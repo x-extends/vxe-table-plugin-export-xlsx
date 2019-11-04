@@ -1,0 +1,77 @@
+{
+  "name": "vxe-table-plugin-export",
+  "version": "1.0.0",
+  "description": "基于 vxe-table 表格的增强插件，支持导出 xlsx 等格式",
+  "scripts": {
+    "lib": "gulp build"
+  },
+  "files": [
+    "dist",
+    "*.ts",
+    "*.d.ts"
+  ],
+  "main": "dist/index.common.js",
+  "style": "dist/style.min.css",
+  "unpkg": "dist/index.min.js",
+  "jsdelivr": "dist/index.min.js",
+  "typings": "index.ts",
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/runtime": "^7.4.4",
+    "@types/file-saver": "^2.0.1",
+    "@typescript-eslint/eslint-plugin": "^2.3.1",
+    "@typescript-eslint/parser": "^2.3.1",
+    "del": "^5.1.0",
+    "eslint": "^5.15.1",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-friendly-formatter": "^4.0.1",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-typescript": "^0.14.0",
+    "file-saver": "^2.0.2",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^6.1.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-clean-css": "^4.2.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-replace": "^1.0.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-typescript": "^5.0.1",
+    "gulp-uglify": "^3.0.2",
+    "markdown-doctest": "^0.9.1",
+    "prettier": "^1.18.2",
+    "typescript": "^3.6.3",
+    "vue": "^2.6.10",
+    "vxe-table": "^2.6.12",
+    "xe-utils": "^2.2.11",
+    "xlsx": "^0.15.1"
+  },
+  "peerDependencies": {
+    "vxe-table": ">=2.6.12",
+    "xe-utils": ">=2.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xuliangzhan/vxe-table-plugin-export.git"
+  },
+  "keywords": [
+    "vxe-table-plugin-export"
+  ],
+  "author": {
+    "name": "Xu Liangzhan",
+    "email": "xu_liangzhan@163.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xuliangzhan/vxe-table-plugin-export/issues"
+  },
+  "homepage": "https://github.com/xuliangzhan/vxe-table-plugin-export#readme"
+}
