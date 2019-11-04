@@ -23,6 +23,44 @@ Vue.use(VXETable)
 VXETable.use(VXETablePluginExport)
 ```
 
+## Demo
+
+```html
+<vxe-toolbar>
+  <template v-slot:buttons>
+    <vxe-button @click="$refs.exportData({ type: 'xlsx' })">导出.xlsx</vxe-button>
+  </template>
+</vxe-toolbar>
+
+<vxe-table
+  border
+  ref="xTable"
+  height="600"
+  :data="tableData">
+  <vxe-table-column type="index" width="60"></vxe-table-column>
+  <vxe-table-column prop="name" label="Name"></vxe-table-column>
+  <vxe-table-column prop="age" label="Age"></vxe-table-column>
+  <vxe-table-column prop="date" label="Date"></vxe-table-column>
+</vxe-table>
+```
+
+```javascript
+export default {
+  data () {
+    return {
+      tableData: [
+        {
+          id: 100,
+          name: 'test',
+          age: 26,
+          date: null
+        }
+      ]
+    }
+  }
+}
+```
+
 ## License
 
 MIT License, 2019-present, Xu Liangzhan
