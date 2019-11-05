@@ -7,7 +7,7 @@
     var mod = {
       exports: {}
     };
-    factory(mod.exports, global.XEUtils, global.xlsx, global.fileSaver);
+    factory(mod.exports, global.XEUtils, global.XLSX, global.FileSaver);
     global.VXETablePluginExport = mod.exports.default;
   }
 })(this, function (_exports, _xeUtils, XLSX, FileSaver) {

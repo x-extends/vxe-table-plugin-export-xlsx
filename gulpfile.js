@@ -50,7 +50,9 @@ gulp.task('build_umd', function () {
         ['@babel/transform-modules-umd', {
           globals: {
             [pack.name]: exportModuleName,
-            'xe-utils': 'XEUtils'
+            'xe-utils': 'XEUtils',
+            'xlsx': 'XLSX',
+            'file-saver': 'FileSaver'
           },
           exactGlobals: true
         }]
