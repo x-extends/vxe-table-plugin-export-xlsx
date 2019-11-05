@@ -28,7 +28,7 @@ VXETable.use(VXETablePluginExport)
 ```html
 <vxe-toolbar>
   <template v-slot:buttons>
-    <vxe-button @click="$refs.exportData({ type: 'xlsx' })">导出.xlsx</vxe-button>
+    <vxe-button @click="exportEvent">导出.xlsx</vxe-button>
   </template>
 </vxe-toolbar>
 
@@ -56,6 +56,15 @@ export default {
           date: null
         }
       ]
+    }
+  },
+  methods: {
+    exportEvent() {
+      this.$refs.exportData({
+        filename: 'export',
+        sheetName: 'Sheet1',
+        type: 'xlsx'
+      })
     }
   }
 }

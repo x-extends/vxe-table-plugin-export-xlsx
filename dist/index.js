@@ -43,6 +43,7 @@
         columns = params.columns,
         datas = params.datas;
     var filename = options.filename,
+        sheetName = options.sheetName,
         type = options.type,
         isHeader = options.isHeader,
         original = options.original;
@@ -66,7 +67,7 @@
       skipHeader: true
     }); // 转换数据
 
-    XLSX.utils.book_append_sheet(book, sheet, filename);
+    XLSX.utils.book_append_sheet(book, sheet, sheetName);
     var wbout = XLSX.write(book, {
       bookType: type,
       bookSST: false,

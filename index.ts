@@ -12,7 +12,7 @@ function toBuffer(wbout: any) {
 
 function toXLSX(params: any) {
   const { options, columns, datas } = params
-  const { filename, type, isHeader, original } = options
+  const { filename, sheetName, type, isHeader, original } = options
   const colHead: any = {}
   if (isHeader) {
     columns.forEach((column: any) => {
@@ -29,7 +29,7 @@ function toXLSX(params: any) {
   const book = XLSX.utils.book_new()
   const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList), { skipHeader: true })
   // 转换数据
-  XLSX.utils.book_append_sheet(book, sheet, filename)
+  XLSX.utils.book_append_sheet(book, sheet, sheetName)
   const wbout = XLSX.write(book, { bookType: type, bookSST: false, type: 'binary' })
   const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
   // 保存导出
