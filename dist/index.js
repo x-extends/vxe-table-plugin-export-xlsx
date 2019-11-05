@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define("vxe-table-plugin-export", ["exports", "xe-utils", "xlsx", "file-saver"], factory);
+    define("vxe-table-plugin-export", ["exports", "xe-utils", "xlsx"], factory);
   } else if (typeof exports !== "undefined") {
-    factory(exports, require("xe-utils"), require("xlsx"), require("file-saver"));
+    factory(exports, require("xe-utils"), require("xlsx"));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, global.XEUtils, global.XLSX, global.FileSaver);
+    factory(mod.exports, global.XEUtils, global.XLSX);
     global.VXETablePluginExport = mod.exports.default;
   }
-})(this, function (_exports, _xeUtils, XLSX, FileSaver) {
+})(this, function (_exports, _xeUtils, XLSX) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -19,7 +19,6 @@
   _exports["default"] = _exports.VXETablePluginExport = void 0;
   _xeUtils = _interopRequireDefault(_xeUtils);
   XLSX = _interopRequireWildcard(XLSX);
-  FileSaver = _interopRequireWildcard(FileSaver);
 
   function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
@@ -77,7 +76,28 @@
       type: 'application/octet-stream'
     }); // 保存导出
 
-    FileSaver.saveAs(blob, "".concat(filename, ".").concat(type));
+    download(blob, options);
+  }
+
+  function download(blob, options) {
+    if (window.Blob) {
+      var filename = options.filename,
+          type = options.type;
+
+      if (navigator.msSaveBlob) {
+        navigator.msSaveBlob(blob, filename);
+      } else {
+        var linkElem = document.createElement('a');
+        linkElem.target = '_blank';
+        linkElem.download = "".concat(filename, ".").concat(type);
+        linkElem.href = URL.createObjectURL(blob);
+        document.body.appendChild(linkElem);
+        linkElem.click();
+        document.body.removeChild(linkElem);
+      }
+    } else {
+      console.error('[vxe-table-plugin-export] The current environment does not support exports.');
+    }
   }
 
   function handleExportEvent(params) {

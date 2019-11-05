@@ -11,7 +11,7 @@
 ## Installing
 
 ```shell
-npm install xe-utils vxe-table vxe-table-plugin-export xlsx file-saver
+npm install xe-utils vxe-table vxe-table-plugin-export xlsx
 ```
 
 ```javascript

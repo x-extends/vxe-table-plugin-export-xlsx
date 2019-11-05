@@ -1,7 +1,6 @@
 import XEUtils from 'xe-utils/methods/xe-utils'
 import VXETable from 'vxe-table/lib/vxe-table'
 import * as XLSX from 'xlsx'
-import * as FileSaver from 'file-saver'
 
 function toBuffer(wbout: any) {
   let buf = new ArrayBuffer(wbout.length)
@@ -33,7 +32,26 @@ function toXLSX(params: any) {
   const wbout = XLSX.write(book, { bookType: type, bookSST: false, type: 'binary' })
   const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
   // 保存导出
-  FileSaver.saveAs(blob, `${filename}.${type}`)
+  download(blob, options)
+}
+
+function download(blob: Blob, options: any) {
+  if (window.Blob) {
+    const { filename, type } = options
+    if (navigator.msSaveBlob) {
+      navigator.msSaveBlob(blob, filename)
+    } else {
+      var linkElem = document.createElement('a')
+      linkElem.target = '_blank'
+      linkElem.download = `${filename}.${type}`
+      linkElem.href = URL.createObjectURL(blob)
+      document.body.appendChild(linkElem)
+      linkElem.click()
+      document.body.removeChild(linkElem)
+    }
+  } else {
+    console.error('[vxe-table-plugin-export] The current environment does not support exports.')
+  }
 }
 
 function handleExportEvent(params: any) {
