@@ -37,12 +37,11 @@
     return buf;
   }
 
-  function toXLSX(params) {
+  function exportXLSX(params) {
     var options = params.options,
         columns = params.columns,
         datas = params.datas;
-    var filename = options.filename,
-        sheetName = options.sheetName,
+    var sheetName = options.sheetName,
         type = options.type,
         isHeader = options.isHeader,
         original = options.original;
@@ -50,7 +49,7 @@
 
     if (isHeader) {
       columns.forEach(function (column) {
-        colHead[column.id] = column.getTitle();
+        colHead[column.id] = original ? column.property : column.getTitle();
       });
     }
 
@@ -100,10 +99,98 @@
     }
   }
 
+  function replaceDoubleQuotation(val) {
+    return val.replace(/^"/, '').replace(/"$/, '');
+  }
+
+  function parseCsv(columns, content) {
+    var list = content.split('\n');
+    var fields = [];
+    var rows = [];
+
+    if (list.length) {
+      var rList = list.slice(1);
+      list[0].split(',').forEach(function (val) {
+        var field = replaceDoubleQuotation(val);
+
+        if (field) {
+          fields.push(field);
+        }
+      });
+      rList.forEach(function (r) {
+        if (r) {
+          var item = {};
+          r.split(',').forEach(function (val, colIndex) {
+            item[fields[colIndex]] = replaceDoubleQuotation(val);
+          });
+          rows.push(item);
+        }
+      });
+    }
+
+    return {
+      fields: fields,
+      rows: rows
+    };
+  }
+
+  function checkImportData(columns, fields, rows) {
+    var tableFields = [];
+    columns.forEach(function (column) {
+      var field = column.property;
+
+      if (field) {
+        tableFields.push(field);
+      }
+    });
+    return tableFields.every(function (field) {
+      return fields.includes(field);
+    });
+  }
+
+  function importXLSX(params, evnt) {
+    var $table = params.$table,
+        columns = params.columns;
+    var importCallback = $table.importCallback;
+    var file = evnt.target.files[0];
+    var fileReader = new FileReader();
+
+    fileReader.onload = function (e) {
+      var workbook = XLSX.read(e.target.result, {
+        type: 'binary'
+      });
+      var csvData = XLSX.utils.sheet_to_csv(workbook.Sheets.Sheet1);
+      var rest = parseCsv(columns, csvData);
+      var fields = rest.fields,
+          rows = rest.rows;
+      var status = checkImportData(columns, fields, rows);
+
+      if (status) {
+        $table.createData(rows).then(function (data) {
+          return $table.reloadData(data);
+        });
+      }
+
+      if (importCallback) {
+        importCallback(status);
+      }
+    };
+
+    fileReader.readAsBinaryString(file);
+  }
+
+  function handleImportEvent(params, evnt) {
+    switch (params.options.type) {
+      case 'xlsx':
+        importXLSX(params, evnt);
+        return false;
+    }
+  }
+
   function handleExportEvent(params) {
     switch (params.options.type) {
       case 'xlsx':
-        toXLSX(params);
+        exportXLSX(params);
         return false;
     }
   }
@@ -117,7 +204,10 @@
       Object.assign(xtable.types, {
         xlsx: 1
       });
-      xtable.interceptor.add('event.export', handleExportEvent);
+      xtable.interceptor.mixin({
+        'event.import': handleImportEvent,
+        'event.export': handleExportEvent
+      });
     }
   };
   _exports.VXETablePluginExport = VXETablePluginExport;
