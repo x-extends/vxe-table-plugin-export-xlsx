@@ -94,10 +94,9 @@ function checkImportData(columns: any[], fields: string[], rows: any[]) {
   return tableFields.every((field: string) => fields.includes(field))
 }
 
-function importXLSX(params: any, evnt: any) {
-  const { $table, columns } = params
-  const { importCallback } = $table
-  const file = evnt.target.files[0]
+function importXLSX(params: any) {
+  const { $table, columns, options, file } = params
+  const { _importCallback } = $table
   const fileReader = new FileReader()
   fileReader.onload = (e: any) => {
     const workbook = XLSX.read(e.target.result, { type: 'binary' })
@@ -107,19 +106,25 @@ function importXLSX(params: any, evnt: any) {
     const status = checkImportData(columns, fields, rows)
     if (status) {
       $table.createData(rows)
-        .then((data: any[]) => $table.reloadData(data))
+        .then((data: any[]) => {
+          if (options.mode === 'append') {
+            $table.insertAt(data, -1)
+          } else {
+            $table.reloadData(data)
+          }
+        })
     }
-    if (importCallback) {
-      importCallback(status)
+    if (_importCallback) {
+      _importCallback(status)
     }
   }
   fileReader.readAsBinaryString(file)
 }
 
-function handleImportEvent(params: any, evnt: any) {
+function handleImportEvent(params: any) {
   switch (params.options.type) {
     case 'xlsx':
-      importXLSX(params, evnt)
+      importXLSX(params)
       return false
   }
 }

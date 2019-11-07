@@ -1,6 +1,6 @@
 {
   "name": "vxe-table-plugin-export",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "基于 vxe-table 表格的增强插件，支持导出 xlsx 等格式",
   "scripts": {
     "lib": "gulp build"
@@ -54,7 +54,7 @@
     "xlsx": "^0.15.1"
   },
   "peerDependencies": {
-    "vxe-table": ">=2.6.12",
+    "vxe-table": ">=2.6.14",
     "xe-utils": ">=2.2.0"
   },
   "repository": {

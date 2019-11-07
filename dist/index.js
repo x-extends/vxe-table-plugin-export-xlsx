@@ -148,11 +148,12 @@
     });
   }
 
-  function importXLSX(params, evnt) {
+  function importXLSX(params) {
     var $table = params.$table,
-        columns = params.columns;
-    var importCallback = $table.importCallback;
-    var file = evnt.target.files[0];
+        columns = params.columns,
+        options = params.options,
+        file = params.file;
+    var _importCallback = $table._importCallback;
     var fileReader = new FileReader();
 
     fileReader.onload = function (e) {
@@ -167,22 +168,26 @@
 
       if (status) {
         $table.createData(rows).then(function (data) {
-          return $table.reloadData(data);
+          if (options.mode === 'append') {
+            $table.insertAt(data, -1);
+          } else {
+            $table.reloadData(data);
+          }
         });
       }
 
-      if (importCallback) {
-        importCallback(status);
+      if (_importCallback) {
+        _importCallback(status);
       }
     };
 
     fileReader.readAsBinaryString(file);
   }
 
-  function handleImportEvent(params, evnt) {
+  function handleImportEvent(params) {
     switch (params.options.type) {
       case 'xlsx':
-        importXLSX(params, evnt);
+        importXLSX(params);
         return false;
     }
   }
