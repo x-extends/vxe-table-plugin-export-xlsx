@@ -38,13 +38,15 @@
   }
 
   function exportXLSX(params) {
-    var options = params.options,
+    var $table = params.$table,
+        options = params.options,
         columns = params.columns,
         datas = params.datas;
     var sheetName = options.sheetName,
         type = options.type,
         isHeader = options.isHeader,
-        original = options.original;
+        original = options.original,
+        message = options.message;
     var colHead = {};
 
     if (isHeader) {
@@ -76,6 +78,13 @@
     }); // 保存导出
 
     download(blob, options);
+
+    if (message) {
+      $table.$XModal.message({
+        message: i18n('vxe.table.expSuccess'),
+        status: 'success'
+      });
+    }
   }
 
   function download(blob, options) {
@@ -174,6 +183,18 @@
             $table.reloadData(data);
           }
         });
+
+        if (options.message) {
+          $table.$XModal.message({
+            message: i18n('vxe.table.impSuccess'),
+            status: 'success'
+          });
+        }
+      } else if (options.message) {
+        $table.$XModal.message({
+          message: i18n('vxe.error.impFields'),
+          status: 'error'
+        });
       }
 
       if (_importCallback) {
@@ -213,9 +234,16 @@
         'event.import': handleImportEvent,
         'event.export': handleExportEvent
       });
+      VXETablePluginExport.t = xtable.t;
     }
   };
   _exports.VXETablePluginExport = VXETablePluginExport;
+
+  function i18n(key) {
+    if (VXETablePluginExport.t) {
+      return VXETablePluginExport.t(key);
+    }
+  }
 
   if (typeof window !== 'undefined' && window.VXETable) {
     window.VXETable.use(VXETablePluginExport);

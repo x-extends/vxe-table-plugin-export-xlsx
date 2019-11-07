@@ -10,8 +10,8 @@ function toBuffer(wbout: any) {
 }
 
 function exportXLSX(params: any) {
-  const { options, columns, datas } = params
-  const { sheetName, type, isHeader, original } = options
+  const { $table, options, columns, datas } = params
+  const { sheetName, type, isHeader, original, message } = options
   const colHead: any = {}
   if (isHeader) {
     columns.forEach((column: any) => {
@@ -33,6 +33,9 @@ function exportXLSX(params: any) {
   const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
   // 保存导出
   download(blob, options)
+  if (message) {
+    $table.$XModal.message({ message: i18n('vxe.table.expSuccess'), status: 'success' })
+  }
 }
 
 function download(blob: Blob, options: any) {
@@ -50,7 +53,7 @@ function download(blob: Blob, options: any) {
       document.body.removeChild(linkElem)
     }
   } else {
-    console.error('[vxe-table-plugin-export] The current environment does not support exports.')
+    console.error(i18n('vxe.error.notExp'))
   }
 }
 
@@ -113,6 +116,11 @@ function importXLSX(params: any) {
             $table.reloadData(data)
           }
         })
+      if (options.message) {
+        $table.$XModal.message({ message: i18n('vxe.table.impSuccess'), status: 'success' })
+      }
+    } else if (options.message) {
+      $table.$XModal.message({ message: i18n('vxe.error.impFields'), status: 'error' })
     }
     if (_importCallback) {
       _importCallback(status)
@@ -140,13 +148,20 @@ function handleExportEvent(params: any) {
 /**
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 等格式
  */
-export const VXETablePluginExport = {
+export const VXETablePluginExport: any = {
   install(xtable: typeof VXETable) {
     Object.assign(xtable.types, { xlsx: 1 })
     xtable.interceptor.mixin({
       'event.import': handleImportEvent,
       'event.export': handleExportEvent
     })
+    VXETablePluginExport.t = xtable.t
+  }
+}
+
+function i18n(key: string) {
+  if (VXETablePluginExport.t) {
+    return VXETablePluginExport.t(key)
   }
 }
 

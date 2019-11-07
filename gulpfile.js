@@ -51,8 +51,7 @@ gulp.task('build_umd', function () {
           globals: {
             [pack.name]: exportModuleName,
             'xe-utils': 'XEUtils',
-            'xlsx': 'XLSX',
-            'file-saver': 'FileSaver'
+            'xlsx': 'XLSX'
           },
           exactGlobals: true
         }]
