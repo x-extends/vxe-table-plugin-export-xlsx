@@ -45,9 +45,12 @@
     var sheetName = options.sheetName,
         type = options.type,
         isHeader = options.isHeader,
+        isFooter = options.isFooter,
         original = options.original,
-        message = options.message;
+        message = options.message,
+        footerFilterMethod = options.footerFilterMethod;
     var colHead = {};
+    var footList = [];
 
     if (isHeader) {
       columns.forEach(function (column) {
@@ -62,8 +65,21 @@
       });
       return item;
     });
+
+    if (isFooter) {
+      var footerData = $table.footerData;
+      var footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData;
+      footers.forEach(function (rows) {
+        var item = {};
+        columns.forEach(function (column) {
+          item[column.id] = rows[$table.getColumnIndex(column)] || '';
+        });
+        footList.push(item);
+      });
+    }
+
     var book = XLSX.utils.book_new();
-    var sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList), {
+    var sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
       skipHeader: true
     }); // 转换数据
 

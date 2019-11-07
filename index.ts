@@ -11,8 +11,9 @@ function toBuffer(wbout: any) {
 
 function exportXLSX(params: any) {
   const { $table, options, columns, datas } = params
-  const { sheetName, type, isHeader, original, message } = options
+  const { sheetName, type, isHeader, isFooter, original, message, footerFilterMethod } = options
   const colHead: any = {}
+  const footList: any[] = []
   if (isHeader) {
     columns.forEach((column: any) => {
       colHead[column.id] = original ? column.property : column.getTitle()
@@ -25,8 +26,19 @@ function exportXLSX(params: any) {
     })
     return item
   })
+  if (isFooter) {
+    const footerData = $table.footerData
+    const footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
+    footers.forEach((rows: any[]) => {
+      const item: any = {}
+      columns.forEach((column: any) => {
+        item[column.id] = rows[$table.getColumnIndex(column)] || ''
+      })
+      footList.push(item)
+    })
+  }
   const book = XLSX.utils.book_new()
-  const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList), { skipHeader: true })
+  const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
   // 转换数据
   XLSX.utils.book_append_sheet(book, sheet, sheetName)
   const wbout = XLSX.write(book, { bookType: type, bookSST: false, type: 'binary' })
