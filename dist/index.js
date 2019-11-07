@@ -104,7 +104,7 @@
         document.body.removeChild(linkElem);
       }
     } else {
-      console.error('[vxe-table-plugin-export] The current environment does not support exports.');
+      console.error(i18n('vxe.error.notExp'));
     }
   }
 
