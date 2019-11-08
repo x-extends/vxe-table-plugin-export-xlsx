@@ -54,7 +54,7 @@
 
     if (isHeader) {
       columns.forEach(function (column) {
-        colHead[column.id] = original ? column.property : column.getTitle();
+        colHead[column.id] = (original ? column.property : column.getTitle()) || '';
       });
     }
 
@@ -93,9 +93,9 @@
       type: 'application/octet-stream'
     }); // 保存导出
 
-    download(blob, options);
+    downloadFile(blob, options);
 
-    if (message) {
+    if (message !== false) {
       $table.$XModal.message({
         message: i18n('vxe.table.expSuccess'),
         status: 'success'
@@ -103,7 +103,7 @@
     }
   }
 
-  function download(blob, options) {
+  function downloadFile(blob, options) {
     if (window.Blob) {
       var filename = options.filename,
           type = options.type;
@@ -200,13 +200,13 @@
           }
         });
 
-        if (options.message) {
+        if (options.message !== false) {
           $table.$XModal.message({
             message: i18n('vxe.table.impSuccess'),
             status: 'success'
           });
         }
-      } else if (options.message) {
+      } else if (options.message !== false) {
         $table.$XModal.message({
           message: i18n('vxe.error.impFields'),
           status: 'error'

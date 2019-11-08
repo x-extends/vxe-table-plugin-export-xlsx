@@ -16,7 +16,7 @@ function exportXLSX(params: any) {
   const footList: any[] = []
   if (isHeader) {
     columns.forEach((column: any) => {
-      colHead[column.id] = original ? column.property : column.getTitle()
+      colHead[column.id] = (original ? column.property : column.getTitle()) || ''
     })
   }
   const rowList = datas.map((row: any) => {
@@ -44,13 +44,13 @@ function exportXLSX(params: any) {
   const wbout = XLSX.write(book, { bookType: type, bookSST: false, type: 'binary' })
   const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
   // 保存导出
-  download(blob, options)
-  if (message) {
+  downloadFile(blob, options)
+  if (message !== false) {
     $table.$XModal.message({ message: i18n('vxe.table.expSuccess'), status: 'success' })
   }
 }
 
-function download(blob: Blob, options: any) {
+function downloadFile(blob: Blob, options: any) {
   if (window.Blob) {
     const { filename, type } = options
     if (navigator.msSaveBlob) {
@@ -128,10 +128,10 @@ function importXLSX(params: any) {
             $table.reloadData(data)
           }
         })
-      if (options.message) {
+      if (options.message !== false) {
         $table.$XModal.message({ message: i18n('vxe.table.impSuccess'), status: 'success' })
       }
-    } else if (options.message) {
+    } else if (options.message !== false) {
       $table.$XModal.message({ message: i18n('vxe.error.impFields'), status: 'error' })
     }
     if (_importCallback) {
