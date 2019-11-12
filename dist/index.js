@@ -178,7 +178,8 @@
         columns = params.columns,
         options = params.options,
         file = params.file;
-    var _importCallback = $table._importCallback;
+    var _importCallback = $table._importCallback,
+        _importResolve = $table._importResolve;
     var fileReader = new FileReader();
 
     fileReader.onload = function (e) {
@@ -213,8 +214,15 @@
         });
       }
 
-      if (_importCallback) {
+      if (_importResolve) {
+        _importResolve(status);
+
+        $table._importResolve = null;
+      } else if (_importCallback) {
+        // 已废弃
         _importCallback(status);
+
+        $table._importCallback = null;
       }
     };
 

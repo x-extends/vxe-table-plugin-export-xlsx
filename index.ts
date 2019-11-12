@@ -111,7 +111,7 @@ function checkImportData(columns: any[], fields: string[], rows: any[]) {
 
 function importXLSX(params: any) {
   const { $table, columns, options, file } = params
-  const { _importCallback } = $table
+  const { _importCallback, _importResolve } = $table
   const fileReader = new FileReader()
   fileReader.onload = (e: any) => {
     const workbook = XLSX.read(e.target.result, { type: 'binary' })
@@ -134,8 +134,13 @@ function importXLSX(params: any) {
     } else if (options.message !== false) {
       $table.$XModal.message({ message: i18n('vxe.error.impFields'), status: 'error' })
     }
-    if (_importCallback) {
+    if (_importResolve) {
+      _importResolve(status)
+      $table._importResolve = null
+    } else if (_importCallback) {
+      // 已废弃
       _importCallback(status)
+      $table._importCallback = null
     }
   }
   fileReader.readAsBinaryString(file)
