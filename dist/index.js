@@ -1,6 +1,6 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define("vxe-table-plugin-export", ["exports", "xe-utils", "xlsx"], factory);
+    define("vxe-table-plugin-export-xlsx", ["exports", "xe-utils", "xlsx"], factory);
   } else if (typeof exports !== "undefined") {
     factory(exports, require("xe-utils"), require("xlsx"));
   } else {
@@ -8,21 +8,17 @@
       exports: {}
     };
     factory(mod.exports, global.XEUtils, global.XLSX);
-    global.VXETablePluginExport = mod.exports.default;
+    global.VXETablePluginExportXLSX = mod.exports.default;
   }
-})(this, function (_exports, _xeUtils, XLSX) {
+})(this, function (_exports, _xeUtils, _xlsx) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
     value: true
   });
-  _exports["default"] = _exports.VXETablePluginExport = void 0;
+  _exports["default"] = _exports.VXETablePluginExportXLSX = void 0;
   _xeUtils = _interopRequireDefault(_xeUtils);
-  XLSX = _interopRequireWildcard(XLSX);
-
-  function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
-
-  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+  _xlsx = _interopRequireDefault(_xlsx);
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -54,14 +50,29 @@
 
     if (isHeader) {
       columns.forEach(function (column) {
-        colHead[column.id] = (original ? column.property : column.getTitle()) || '';
+        colHead[column.id] = _xeUtils["default"].toString(original ? column.property : column.getTitle());
       });
     }
 
-    var rowList = datas.map(function (row) {
+    var rowList = datas.map(function (row, rowIndex) {
       var item = {};
-      columns.forEach(function (column) {
-        item[column.id] = original ? _xeUtils["default"].get(row, column.property) : row[column.id];
+      columns.forEach(function (column, columnIndex) {
+        var cellValue;
+        var property = column.property;
+        var isIndex = column.type === 'index';
+
+        if (!original || isIndex) {
+          cellValue = isIndex ? column.indexMethod ? column.indexMethod({
+            row: row,
+            rowIndex: rowIndex,
+            column: column,
+            columnIndex: columnIndex
+          }) : rowIndex + 1 : row[column.id];
+        } else {
+          cellValue = _xeUtils["default"].get(row, property);
+        }
+
+        item[column.id] = cellValue;
       });
       return item;
     });
@@ -78,17 +89,21 @@
       });
     }
 
-    var book = XLSX.utils.book_new();
-    var sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
+    var book = _xlsx["default"].utils.book_new();
+
+    var sheet = _xlsx["default"].utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
       skipHeader: true
     }); // 转换数据
 
-    XLSX.utils.book_append_sheet(book, sheet, sheetName);
-    var wbout = XLSX.write(book, {
+
+    _xlsx["default"].utils.book_append_sheet(book, sheet, sheetName);
+
+    var wbout = _xlsx["default"].write(book, {
       bookType: type,
       bookSST: false,
       type: 'binary'
     });
+
     var blob = new Blob([toBuffer(wbout)], {
       type: 'application/octet-stream'
     }); // 保存导出
@@ -109,7 +124,7 @@
           type = options.type;
 
       if (navigator.msSaveBlob) {
-        navigator.msSaveBlob(blob, filename);
+        navigator.msSaveBlob(blob, "".concat(filename, ".").concat(type));
       } else {
         var linkElem = document.createElement('a');
         linkElem.target = '_blank';
@@ -183,10 +198,12 @@
     var fileReader = new FileReader();
 
     fileReader.onload = function (e) {
-      var workbook = XLSX.read(e.target.result, {
+      var workbook = _xlsx["default"].read(e.target.result, {
         type: 'binary'
       });
-      var csvData = XLSX.utils.sheet_to_csv(workbook.Sheets.Sheet1);
+
+      var csvData = _xlsx["default"].utils.sheet_to_csv(workbook.Sheets.Sheet1);
+
       var rest = parseCsv(columns, csvData);
       var fields = rest.fields,
           rows = rest.rows;
@@ -230,26 +247,24 @@
   }
 
   function handleImportEvent(params) {
-    switch (params.options.type) {
-      case 'xlsx':
-        importXLSX(params);
-        return false;
+    if (params.options.type === 'xlsx') {
+      importXLSX(params);
+      return false;
     }
   }
 
   function handleExportEvent(params) {
-    switch (params.options.type) {
-      case 'xlsx':
-        exportXLSX(params);
-        return false;
+    if (params.options.type === 'xlsx') {
+      exportXLSX(params);
+      return false;
     }
   }
   /**
-   * 基于 vxe-table 表格的增强插件，支持导出 xlsx 等格式
+   * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
    */
 
 
-  var VXETablePluginExport = {
+  var VXETablePluginExportXLSX = {
     install: function install(xtable) {
       Object.assign(xtable.types, {
         xlsx: 1
@@ -258,21 +273,21 @@
         'event.import': handleImportEvent,
         'event.export': handleExportEvent
       });
-      VXETablePluginExport.t = xtable.t;
+      VXETablePluginExportXLSX.t = xtable.t;
     }
   };
-  _exports.VXETablePluginExport = VXETablePluginExport;
+  _exports.VXETablePluginExportXLSX = VXETablePluginExportXLSX;
 
   function i18n(key) {
-    if (VXETablePluginExport.t) {
-      return VXETablePluginExport.t(key);
+    if (VXETablePluginExportXLSX.t) {
+      return VXETablePluginExportXLSX.t(key);
     }
   }
 
   if (typeof window !== 'undefined' && window.VXETable) {
-    window.VXETable.use(VXETablePluginExport);
+    window.VXETable.use(VXETablePluginExportXLSX);
   }
 
-  var _default = VXETablePluginExport;
+  var _default = VXETablePluginExportXLSX;
   _exports["default"] = _default;
 });

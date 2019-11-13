@@ -1,6 +1,6 @@
 import XEUtils from 'xe-utils/methods/xe-utils'
 import VXETable from 'vxe-table/lib/vxe-table'
-import * as XLSX from 'xlsx'
+import XLSX from 'xlsx'
 
 function toBuffer(wbout: any) {
   let buf = new ArrayBuffer(wbout.length)
@@ -16,19 +16,27 @@ function exportXLSX(params: any) {
   const footList: any[] = []
   if (isHeader) {
     columns.forEach((column: any) => {
-      colHead[column.id] = (original ? column.property : column.getTitle()) || ''
+      colHead[column.id] = XEUtils.toString(original ? column.property : column.getTitle())
     })
   }
-  const rowList = datas.map((row: any) => {
+  const rowList: any[] = datas.map((row: any, rowIndex: number) => {
     const item: any = {}
-    columns.forEach((column: any) => {
-      item[column.id] = original ? XEUtils.get(row, column.property) : row[column.id]
+    columns.forEach((column: any, columnIndex: number) => {
+      let cellValue
+      const property = column.property
+      const isIndex = column.type === 'index'
+      if (!original || isIndex) {
+        cellValue = isIndex ? (column.indexMethod ? column.indexMethod({ row, rowIndex, column, columnIndex }) : rowIndex + 1) : row[column.id]
+      } else {
+        cellValue = XEUtils.get(row, property)
+      }
+      item[column.id] = cellValue
     })
     return item
   })
   if (isFooter) {
-    const footerData = $table.footerData
-    const footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
+    const footerData: any[] = $table.footerData
+    const footers: any[] = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
     footers.forEach((rows: any[]) => {
       const item: any = {}
       columns.forEach((column: any) => {
@@ -54,7 +62,7 @@ function downloadFile(blob: Blob, options: any) {
   if (window.Blob) {
     const { filename, type } = options
     if (navigator.msSaveBlob) {
-      navigator.msSaveBlob(blob, filename)
+      navigator.msSaveBlob(blob, `${filename}.${type}`)
     } else {
       var linkElem = document.createElement('a')
       linkElem.target = '_blank'
@@ -147,43 +155,41 @@ function importXLSX(params: any) {
 }
 
 function handleImportEvent(params: any) {
-  switch (params.options.type) {
-    case 'xlsx':
-      importXLSX(params)
-      return false
+  if (params.options.type === 'xlsx') {
+    importXLSX(params)
+    return false
   }
 }
 
 function handleExportEvent(params: any) {
-  switch (params.options.type) {
-    case 'xlsx':
-      exportXLSX(params)
-      return false
+  if (params.options.type === 'xlsx') {
+    exportXLSX(params)
+    return false
   }
 }
 
 /**
- * 基于 vxe-table 表格的增强插件，支持导出 xlsx 等格式
+ * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
-export const VXETablePluginExport: any = {
+export const VXETablePluginExportXLSX: any = {
   install(xtable: typeof VXETable) {
     Object.assign(xtable.types, { xlsx: 1 })
     xtable.interceptor.mixin({
       'event.import': handleImportEvent,
       'event.export': handleExportEvent
     })
-    VXETablePluginExport.t = xtable.t
+    VXETablePluginExportXLSX.t = xtable.t
   }
 }
 
 function i18n(key: string) {
-  if (VXETablePluginExport.t) {
-    return VXETablePluginExport.t(key)
+  if (VXETablePluginExportXLSX.t) {
+    return VXETablePluginExportXLSX.t(key)
   }
 }
 
 if (typeof window !== 'undefined' && window.VXETable) {
-  window.VXETable.use(VXETablePluginExport)
+  window.VXETable.use(VXETablePluginExportXLSX)
 }
 
-export default VXETablePluginExport
+export default VXETablePluginExportXLSX

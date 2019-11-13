@@ -8,10 +8,10 @@ const sourcemaps = require('gulp-sourcemaps')
 const ts = require('gulp-typescript')
 const pack = require('./package.json')
 
-const exportModuleName = 'VXETablePluginExport'
+const exportModuleName = 'VXETablePluginExportXLSX'
 
 gulp.task('build_commonjs', function () {
-  return gulp.src(['depend.ts', 'index.ts'])
+  return gulp.src(['index.d.ts', 'depend.ts', 'index.ts'])
     .pipe(sourcemaps.init())
     .pipe(ts({
       strict: true,
@@ -32,7 +32,7 @@ gulp.task('build_commonjs', function () {
 })
 
 gulp.task('build_umd', function () {
-  return gulp.src(['depend.ts', 'index.ts'])
+  return gulp.src(['index.d.ts', 'depend.ts', 'index.ts'])
     .pipe(ts({
       strict: true,
       moduleResolution: 'node',

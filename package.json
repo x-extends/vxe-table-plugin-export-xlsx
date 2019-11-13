@@ -1,7 +1,7 @@
 {
-  "name": "vxe-table-plugin-export",
-  "version": "1.0.10",
-  "description": "基于 vxe-table 表格的增强插件，支持导出 xlsx 等格式",
+  "name": "vxe-table-plugin-export-xlsx",
+  "version": "1.0.0-alpha.4",
+  "description": "基于 vxe-table 表格的增强插件，支持导出 xlsx 格式",
   "scripts": {
     "lib": "gulp build"
   },
@@ -20,7 +20,6 @@
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "@babel/runtime": "^7.4.4",
-    "@types/file-saver": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^2.3.1",
     "@typescript-eslint/parser": "^2.3.1",
     "del": "^5.1.0",
@@ -47,22 +46,23 @@
     "gulp-uglify": "^3.0.2",
     "markdown-doctest": "^0.9.1",
     "prettier": "^1.18.2",
-    "typescript": "^3.6.3",
+    "typescript": "^3.7.2",
     "vue": "^2.6.10",
-    "vxe-table": "^2.6.15",
+    "vxe-table": "^2.6.18",
     "xe-utils": "^2.2.11",
     "xlsx": "^0.15.1"
   },
   "peerDependencies": {
-    "vxe-table": ">=2.6.15",
-    "xe-utils": ">=2.2.0"
+    "vxe-table": ">=2.6.19",
+    "xe-utils": ">=2.2.0",
+    "xlsx": ">=0.15.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xuliangzhan/vxe-table-plugin-export.git"
+    "url": "git+https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx.git"
   },
   "keywords": [
-    "vxe-table-plugin-export"
+    "vxe-table-plugin-export-xlsx"
   ],
   "author": {
     "name": "Xu Liangzhan",
@@ -70,7 +70,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/xuliangzhan/vxe-table-plugin-export/issues"
+    "url": "https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx/issues"
   },
-  "homepage": "https://github.com/xuliangzhan/vxe-table-plugin-export#readme"
+  "homepage": "https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx#readme"
 }
