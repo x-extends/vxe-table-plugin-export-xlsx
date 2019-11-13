@@ -48,7 +48,7 @@
     "prettier": "^1.18.2",
     "typescript": "^3.7.2",
     "vue": "^2.6.10",
-    "vxe-table": "^2.6.18",
+    "vxe-table": "^2.6.19",
     "xe-utils": "^2.2.11",
     "xlsx": "^0.15.1"
   },
