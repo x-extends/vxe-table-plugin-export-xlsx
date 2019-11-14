@@ -48,12 +48,12 @@
     "prettier": "^1.18.2",
     "typescript": "^3.7.2",
     "vue": "^2.6.10",
-    "vxe-table": "^2.6.19",
+    "vxe-table": "^2.6.20",
     "xe-utils": "^2.2.12",
     "xlsx": "^0.15.1"
   },
   "peerDependencies": {
-    "vxe-table": ">=2.6.19",
+    "vxe-table": ">=2.6.20",
     "xe-utils": ">=2.2.0",
     "xlsx": ">=0.15.0"
   },
