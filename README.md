@@ -60,7 +60,7 @@ export default {
   },
   methods: {
     exportEvent() {
-      this.$refs.exportData({
+      this.$refs.xTable.exportData({
         filename: 'export',
         sheetName: 'Sheet1',
         type: 'xlsx'
