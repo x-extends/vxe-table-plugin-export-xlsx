@@ -38,9 +38,9 @@ VXETable.use(VXETablePluginExportXLSX)
   height="600"
   :data="tableData">
   <vxe-table-column type="index" width="60"></vxe-table-column>
-  <vxe-table-column prop="name" label="Name"></vxe-table-column>
-  <vxe-table-column prop="age" label="Age"></vxe-table-column>
-  <vxe-table-column prop="date" label="Date"></vxe-table-column>
+  <vxe-table-column field="name" title="Name"></vxe-table-column>
+  <vxe-table-column field="age" title="Age"></vxe-table-column>
+  <vxe-table-column field="date" title="Date"></vxe-table-column>
 </vxe-table>
 ```
 
