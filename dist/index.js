@@ -83,7 +83,7 @@
       footers.forEach(function (rows) {
         var item = {};
         columns.forEach(function (column) {
-          item[column.id] = rows[$table.getColumnIndex(column)] || '';
+          item[column.id] = rows[$table.$getColumnIndex(column)] || '';
         });
         footList.push(item);
       });
