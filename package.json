@@ -53,7 +53,7 @@
     "xlsx": "^0.15.1"
   },
   "peerDependencies": {
-    "vxe-table": ">=2.7.6",
+    "vxe-table": ">=2.7.5",
     "xe-utils": ">=2.2.0",
     "xlsx": ">=0.15.0"
   },
