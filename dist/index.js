@@ -10,7 +10,7 @@
     factory(mod.exports, global.XEUtils, global.XLSX);
     global.VXETablePluginExportXLSX = mod.exports.default;
   }
-})(this, function (_exports, _xeUtils, _xlsx) {
+})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports, _xeUtils, _xlsx) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -21,6 +21,18 @@
   _xlsx = _interopRequireDefault(_xlsx);
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+  function getSeq($table, row, rowIndex, column, columnIndex) {
+    // 在 v3.0 中废弃 startIndex、indexMethod
+    var seqOpts = $table.seqOpts;
+    var seqMethod = seqOpts.seqMethod || column.indexMethod;
+    return seqMethod ? seqMethod({
+      row: row,
+      rowIndex: rowIndex,
+      column: column,
+      columnIndex: columnIndex
+    }) : (seqOpts.startIndex || $table.startIndex) + rowIndex + 1;
+  }
 
   function toBuffer(wbout) {
     var buf = new ArrayBuffer(wbout.length);
@@ -47,35 +59,13 @@
         footerFilterMethod = options.footerFilterMethod;
     var colHead = {};
     var footList = [];
+    var rowList = datas;
 
     if (isHeader) {
       columns.forEach(function (column) {
         colHead[column.id] = _xeUtils["default"].toString(original ? column.property : column.getTitle());
       });
     }
-
-    var rowList = datas.map(function (row, rowIndex) {
-      var item = {};
-      columns.forEach(function (column, columnIndex) {
-        var cellValue;
-        var property = column.property;
-        var isIndex = column.type === 'index';
-
-        if (!original || isIndex) {
-          cellValue = isIndex ? column.indexMethod ? column.indexMethod({
-            row: row,
-            rowIndex: rowIndex,
-            column: column,
-            columnIndex: columnIndex
-          }) : rowIndex + 1 : row[column.id];
-        } else {
-          cellValue = _xeUtils["default"].get(row, property);
-        }
-
-        item[column.id] = cellValue;
-      });
-      return item;
-    });
 
     if (isFooter) {
       var footerData = $table.footerData;
@@ -150,18 +140,14 @@
 
     if (list.length) {
       var rList = list.slice(1);
-      list[0].split(',').forEach(function (val) {
-        var field = replaceDoubleQuotation(val);
-
-        if (field) {
-          fields.push(field);
-        }
-      });
+      list[0].split(',').map(replaceDoubleQuotation);
       rList.forEach(function (r) {
         if (r) {
           var item = {};
           r.split(',').forEach(function (val, colIndex) {
-            item[fields[colIndex]] = replaceDoubleQuotation(val);
+            if (fields[colIndex]) {
+              item[fields[colIndex]] = replaceDoubleQuotation(val);
+            }
           });
           rows.push(item);
         }

@@ -21,26 +21,12 @@ function exportXLSX(params: any) {
   const { sheetName, type, isHeader, isFooter, original, message, footerFilterMethod } = options
   const colHead: any = {}
   const footList: any[] = []
+  const rowList = datas
   if (isHeader) {
     columns.forEach((column: any) => {
       colHead[column.id] = XEUtils.toString(original ? column.property : column.getTitle())
     })
   }
-  const rowList: any[] = datas.map((row: any, rowIndex: number) => {
-    const item: any = {}
-    columns.forEach((column: any, columnIndex: number) => {
-      let cellValue
-      const property = column.property
-      const isIndex = column.type === 'seq' || column.type === 'index'
-      if (!original || isIndex) {
-        cellValue = isIndex ? getSeq($table, row, rowIndex, column, columnIndex) : row[column.id]
-      } else {
-        cellValue = XEUtils.get(row, property)
-      }
-      item[column.id] = cellValue
-    })
-    return item
-  })
   if (isFooter) {
     const footerData: any[] = $table.footerData
     const footers: any[] = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
@@ -94,17 +80,14 @@ function parseCsv(columns: any[], content: string) {
   const rows: any[] = []
   if (list.length) {
     const rList: string[] = list.slice(1)
-    list[0].split(',').forEach((val: string) => {
-      const field: string = replaceDoubleQuotation(val)
-      if (field) {
-        fields.push(field)
-      }
-    })
+    list[0].split(',').map(replaceDoubleQuotation)
     rList.forEach((r: string) => {
       if (r) {
         const item: any = {}
         r.split(',').forEach((val: string, colIndex: number) => {
-          item[fields[colIndex]] = replaceDoubleQuotation(val)
+          if (fields[colIndex]) {
+            item[fields[colIndex]] = replaceDoubleQuotation(val)
+          }
         })
         rows.push(item)
       }
