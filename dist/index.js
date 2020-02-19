@@ -10,7 +10,7 @@
     factory(mod.exports, global.XEUtils, global.XLSX);
     global.VXETablePluginExportXLSX = mod.exports.default;
   }
-})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports, _xeUtils, _xlsx) {
+})(this, function (_exports, _xeUtils, _xlsx) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -22,16 +22,10 @@
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-  function getSeq($table, row, rowIndex, column, columnIndex) {
-    // 在 v3.0 中废弃 startIndex、indexMethod
-    var seqOpts = $table.seqOpts;
-    var seqMethod = seqOpts.seqMethod || column.indexMethod;
-    return seqMethod ? seqMethod({
-      row: row,
-      rowIndex: rowIndex,
-      column: column,
-      columnIndex: columnIndex
-    }) : (seqOpts.startIndex || $table.startIndex) + rowIndex + 1;
+  function getFooterCellValue($table, opts, rows, column) {
+    var cellValue = _xeUtils["default"].toString(rows[$table.$getColumnIndex(column)]);
+
+    return cellValue;
   }
 
   function toBuffer(wbout) {
@@ -73,7 +67,7 @@
       footers.forEach(function (rows) {
         var item = {};
         columns.forEach(function (column) {
-          item[column.id] = rows[$table.$getColumnIndex(column)] || '';
+          item[column.id] = getFooterCellValue($table, options, rows, column);
         });
         footList.push(item);
       });

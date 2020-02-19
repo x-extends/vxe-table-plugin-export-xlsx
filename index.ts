@@ -2,21 +2,19 @@ import XEUtils from 'xe-utils/methods/xe-utils'
 import VXETable from 'vxe-table/lib/vxe-table'
 import XLSX from 'xlsx'
 
-function getSeq($table: any, row: any, rowIndex: number, column: any, columnIndex: number) {
-  // 在 v3.0 中废弃 startIndex、indexMethod
-  let seqOpts = $table.seqOpts
-  let seqMethod = seqOpts.seqMethod || column.indexMethod
-  return seqMethod ? seqMethod({ row, rowIndex, column, columnIndex }) : ((seqOpts.startIndex || $table.startIndex) + rowIndex + 1)
+function getFooterCellValue ($table: any, opts: any, rows: any[], column: any) {
+  var cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
+  return cellValue
 }
 
-function toBuffer(wbout: any) {
+function toBuffer (wbout: any) {
   let buf = new ArrayBuffer(wbout.length)
   let view = new Uint8Array(buf)
   for (let index = 0; index !== wbout.length; ++index) view[index] = wbout.charCodeAt(index) & 0xFF
   return buf
 }
 
-function exportXLSX(params: any) {
+function exportXLSX (params: any) {
   const { $table, options, columns, datas } = params
   const { sheetName, type, isHeader, isFooter, original, message, footerFilterMethod } = options
   const colHead: any = {}
@@ -33,7 +31,7 @@ function exportXLSX(params: any) {
     footers.forEach((rows: any[]) => {
       const item: any = {}
       columns.forEach((column: any) => {
-        item[column.id] = rows[$table.$getColumnIndex(column)] || ''
+        item[column.id] = getFooterCellValue($table, options, rows, column)
       })
       footList.push(item)
     })
@@ -51,7 +49,7 @@ function exportXLSX(params: any) {
   }
 }
 
-function downloadFile(blob: Blob, options: any) {
+function downloadFile (blob: Blob, options: any) {
   if (window.Blob) {
     const { filename, type } = options
     if (navigator.msSaveBlob) {
@@ -70,11 +68,11 @@ function downloadFile(blob: Blob, options: any) {
   }
 }
 
-function replaceDoubleQuotation(val: string) {
+function replaceDoubleQuotation (val: string) {
   return val.replace(/^"/, '').replace(/"$/, '')
 }
 
-function parseCsv(columns: any[], content: string) {
+function parseCsv (columns: any[], content: string) {
   const list: string[] = content.split('\n')
   const fields: any[] = []
   const rows: any[] = []
@@ -96,7 +94,7 @@ function parseCsv(columns: any[], content: string) {
   return { fields, rows }
 }
 
-function checkImportData(columns: any[], fields: string[], rows: any[]) {
+function checkImportData (columns: any[], fields: string[], rows: any[]) {
   let tableFields: string[] = []
   columns.forEach((column: any) => {
     let field: string = column.property
@@ -107,7 +105,7 @@ function checkImportData(columns: any[], fields: string[], rows: any[]) {
   return tableFields.every((field: string) => fields.includes(field))
 }
 
-function importXLSX(params: any) {
+function importXLSX (params: any) {
   const { $table, columns, options, file } = params
   const { _importCallback, _importResolve } = $table
   const fileReader = new FileReader()
@@ -144,14 +142,14 @@ function importXLSX(params: any) {
   fileReader.readAsBinaryString(file)
 }
 
-function handleImportEvent(params: any) {
+function handleImportEvent (params: any) {
   if (params.options.type === 'xlsx') {
     importXLSX(params)
     return false
   }
 }
 
-function handleExportEvent(params: any) {
+function handleExportEvent (params: any) {
   if (params.options.type === 'xlsx') {
     exportXLSX(params)
     return false
@@ -162,7 +160,7 @@ function handleExportEvent(params: any) {
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX: any = {
-  install(xtable: typeof VXETable) {
+  install (xtable: typeof VXETable) {
     Object.assign(xtable.types, { xlsx: 1 })
     xtable.interceptor.mixin({
       'event.import': handleImportEvent,
@@ -172,7 +170,7 @@ export const VXETablePluginExportXLSX: any = {
   }
 }
 
-function i18n(key: string) {
+function i18n (key: string) {
   if (VXETablePluginExportXLSX.t) {
     return VXETablePluginExportXLSX.t(key)
   }
