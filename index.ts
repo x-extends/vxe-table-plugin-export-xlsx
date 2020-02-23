@@ -125,7 +125,7 @@ function importXLSX (params: any) {
           }
         })
       if (options.message !== false) {
-        $table.$XModal.message({ message: i18n('vxe.table.impSuccess'), status: 'success' })
+        $table.$XModal.message({ message: XEUtils.template(i18n('vxe.table.impSuccess'), [rows.length]), status: 'success' })
       }
     } else if (options.message !== false) {
       $table.$XModal.message({ message: i18n('vxe.error.impFields'), status: 'error' })

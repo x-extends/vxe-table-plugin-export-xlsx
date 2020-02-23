@@ -200,7 +200,7 @@
 
         if (options.message !== false) {
           $table.$XModal.message({
-            message: i18n('vxe.table.impSuccess'),
+            message: _xeUtils["default"].template(i18n('vxe.table.impSuccess'), [rows.length]),
             status: 'success'
           });
         }
