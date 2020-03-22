@@ -1,8 +1,8 @@
 import XEUtils from 'xe-utils/methods/xe-utils'
-import VXETable from 'vxe-table/lib/vxe-table'
+import { VXETable, Table, InterceptorExportParams, InterceptorImportParams, ColumnConfig, ExportOptons } from 'vxe-table/lib/vxe-table' // eslint-disable-line no-unused-vars
 import XLSX from 'xlsx'
 
-function getFooterCellValue ($table: any, opts: any, rows: any[], column: any) {
+function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
   var cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
   return cellValue
 }
@@ -14,23 +14,23 @@ function toBuffer (wbout: any) {
   return buf
 }
 
-function exportXLSX (params: any) {
+function exportXLSX (params: InterceptorExportParams) {
   const { $table, options, columns, datas } = params
   const { sheetName, type, isHeader, isFooter, original, message, footerFilterMethod } = options
-  const colHead: any = {}
-  const footList: any[] = []
+  const colHead: { [key: string]: any } = {}
+  const footList: { [key: string]: any }[] = []
   const rowList = datas
   if (isHeader) {
-    columns.forEach((column: any) => {
+    columns.forEach((column) => {
       colHead[column.id] = XEUtils.toString(original ? column.property : column.getTitle())
     })
   }
   if (isFooter) {
-    const footerData: any[] = $table.footerData
-    const footers: any[] = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
-    footers.forEach((rows: any[]) => {
+    const { footerData } = $table.getTableData()
+    const footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
+    footers.forEach((rows) => {
       const item: any = {}
-      columns.forEach((column: any) => {
+      columns.forEach((column) => {
         item[column.id] = getFooterCellValue($table, options, rows, column)
       })
       footList.push(item)
@@ -49,7 +49,7 @@ function exportXLSX (params: any) {
   }
 }
 
-function downloadFile (blob: Blob, options: any) {
+function downloadFile (blob: Blob, options: ExportOptons) {
   if (window.Blob) {
     const { filename, type } = options
     if (navigator.msSaveBlob) {
@@ -72,17 +72,17 @@ function replaceDoubleQuotation (val: string) {
   return val.replace(/^"/, '').replace(/"$/, '')
 }
 
-function parseCsv (columns: any[], content: string) {
-  const list: string[] = content.split('\n')
-  const fields: any[] = []
+function parseCsv (columns: ColumnConfig[], content: string) {
+  const list = content.split('\n')
+  const fields: string[] = []
   const rows: any[] = []
   if (list.length) {
-    const rList: string[] = list.slice(1)
+    const rList = list.slice(1)
     list[0].split(',').map(replaceDoubleQuotation)
-    rList.forEach((r: string) => {
+    rList.forEach((r) => {
       if (r) {
         const item: any = {}
-        r.split(',').forEach((val: string, colIndex: number) => {
+        r.split(',').forEach((val, colIndex) => {
           if (fields[colIndex]) {
             item[fields[colIndex]] = replaceDoubleQuotation(val)
           }
@@ -94,26 +94,26 @@ function parseCsv (columns: any[], content: string) {
   return { fields, rows }
 }
 
-function checkImportData (columns: any[], fields: string[], rows: any[]) {
+function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]) {
   let tableFields: string[] = []
-  columns.forEach((column: any) => {
-    let field: string = column.property
+  columns.forEach((column) => {
+    let field = column.property
     if (field) {
       tableFields.push(field)
     }
   })
-  return tableFields.every((field: string) => fields.includes(field))
+  return tableFields.every((field) => fields.includes(field))
 }
 
-function importXLSX (params: any) {
-  const { $table, columns, options, file } = params
-  const { _importCallback, _importResolve } = $table
+function importXLSX (params: InterceptorImportParams) {
+  const { columns, options, file } = params
+  const $table: any = params.$table
+  const { _importResolve } = $table
   const fileReader = new FileReader()
   fileReader.onload = (e: any) => {
     const workbook = XLSX.read(e.target.result, { type: 'binary' })
     const csvData: string = XLSX.utils.sheet_to_csv(workbook.Sheets.Sheet1)
-    const rest: any = parseCsv(columns, csvData)
-    const { fields, rows } = rest
+    const { fields, rows } = parseCsv(columns, csvData)
     const status = checkImportData(columns, fields, rows)
     if (status) {
       $table.createData(rows)
@@ -133,23 +133,19 @@ function importXLSX (params: any) {
     if (_importResolve) {
       _importResolve(status)
       $table._importResolve = null
-    } else if (_importCallback) {
-      // 已废弃
-      _importCallback(status)
-      $table._importCallback = null
     }
   }
   fileReader.readAsBinaryString(file)
 }
 
-function handleImportEvent (params: any) {
+function handleImportEvent (params: InterceptorImportParams) {
   if (params.options.type === 'xlsx') {
     importXLSX(params)
     return false
   }
 }
 
-function handleExportEvent (params: any) {
+function handleExportEvent (params: InterceptorExportParams) {
   if (params.options.type === 'xlsx') {
     exportXLSX(params)
     return false

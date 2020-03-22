@@ -10,7 +10,7 @@
     factory(mod.exports, global.XEUtils, global.XLSX);
     global.VXETablePluginExportXLSX = mod.exports.default;
   }
-})(this, function (_exports, _xeUtils, _xlsx) {
+})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports, _xeUtils, _xlsx) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -62,7 +62,9 @@
     }
 
     if (isFooter) {
-      var footerData = $table.footerData;
+      var _$table$getTableData = $table.getTableData(),
+          footerData = _$table$getTableData.footerData;
+
       var footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData;
       footers.forEach(function (rows) {
         var item = {};
@@ -169,12 +171,11 @@
   }
 
   function importXLSX(params) {
-    var $table = params.$table,
-        columns = params.columns,
+    var columns = params.columns,
         options = params.options,
         file = params.file;
-    var _importCallback = $table._importCallback,
-        _importResolve = $table._importResolve;
+    var $table = params.$table;
+    var _importResolve = $table._importResolve;
     var fileReader = new FileReader();
 
     fileReader.onload = function (e) {
@@ -184,9 +185,10 @@
 
       var csvData = _xlsx["default"].utils.sheet_to_csv(workbook.Sheets.Sheet1);
 
-      var rest = parseCsv(columns, csvData);
-      var fields = rest.fields,
-          rows = rest.rows;
+      var _parseCsv = parseCsv(columns, csvData),
+          fields = _parseCsv.fields,
+          rows = _parseCsv.rows;
+
       var status = checkImportData(columns, fields, rows);
 
       if (status) {
@@ -215,11 +217,6 @@
         _importResolve(status);
 
         $table._importResolve = null;
-      } else if (_importCallback) {
-        // 已废弃
-        _importCallback(status);
-
-        $table._importCallback = null;
       }
     };
 
