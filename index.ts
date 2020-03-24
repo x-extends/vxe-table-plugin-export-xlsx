@@ -1,6 +1,17 @@
+/* eslint-disable no-unused-vars */
 import XEUtils from 'xe-utils/methods/xe-utils'
-import { VXETable, Table, InterceptorExportParams, InterceptorImportParams, ColumnConfig, ExportOptons } from 'vxe-table/lib/vxe-table' // eslint-disable-line no-unused-vars
+import {
+  VXETable,
+  Table,
+  InterceptorExportParams,
+  InterceptorImportParams,
+  ColumnConfig,
+  ExportOptons
+} from 'vxe-table/lib/vxe-table'
 import XLSX from 'xlsx'
+/* eslint-enable no-unused-vars */
+
+let _vxetable: typeof VXETable
 
 function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
   var cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
@@ -45,7 +56,7 @@ function exportXLSX (params: InterceptorExportParams) {
   // 保存导出
   downloadFile(blob, options)
   if (message !== false) {
-    $table.$XModal.message({ message: i18n('vxe.table.expSuccess'), status: 'success' })
+    _vxetable.modal.message({ message: _vxetable.t('vxe.table.expSuccess'), status: 'success' })
   }
 }
 
@@ -64,7 +75,7 @@ function downloadFile (blob: Blob, options: ExportOptons) {
       document.body.removeChild(linkElem)
     }
   } else {
-    console.error(i18n('vxe.error.notExp'))
+    console.error(_vxetable.t('vxe.error.notExp'))
   }
 }
 
@@ -125,10 +136,10 @@ function importXLSX (params: InterceptorImportParams) {
           }
         })
       if (options.message !== false) {
-        $table.$XModal.message({ message: XEUtils.template(i18n('vxe.table.impSuccess'), [rows.length]), status: 'success' })
+        _vxetable.modal.message({ message: XEUtils.template(_vxetable.t('vxe.table.impSuccess'), [rows.length]), status: 'success' })
       }
     } else if (options.message !== false) {
-      $table.$XModal.message({ message: i18n('vxe.error.impFields'), status: 'error' })
+      _vxetable.modal.message({ message: _vxetable.t('vxe.error.impFields'), status: 'error' })
     }
     if (_importResolve) {
       _importResolve(status)
@@ -155,20 +166,15 @@ function handleExportEvent (params: InterceptorExportParams) {
 /**
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
-export const VXETablePluginExportXLSX: any = {
+export const VXETablePluginExportXLSX = {
   install (xtable: typeof VXETable) {
+    const { interceptor } = xtable
+    _vxetable = xtable
     Object.assign(xtable.types, { xlsx: 1 })
-    xtable.interceptor.mixin({
+    interceptor.mixin({
       'event.import': handleImportEvent,
       'event.export': handleExportEvent
     })
-    VXETablePluginExportXLSX.t = xtable.t
-  }
-}
-
-function i18n (key: string) {
-  if (VXETablePluginExportXLSX.t) {
-    return VXETablePluginExportXLSX.t(key)
   }
 }
 

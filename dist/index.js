@@ -22,6 +22,11 @@
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+  /* eslint-disable no-unused-vars */
+
+  /* eslint-enable no-unused-vars */
+  var _vxetable;
+
   function getFooterCellValue($table, opts, rows, column) {
     var cellValue = _xeUtils["default"].toString(rows[$table.$getColumnIndex(column)]);
 
@@ -97,8 +102,8 @@
     downloadFile(blob, options);
 
     if (message !== false) {
-      $table.$XModal.message({
-        message: i18n('vxe.table.expSuccess'),
+      _vxetable.modal.message({
+        message: _vxetable.t('vxe.table.expSuccess'),
         status: 'success'
       });
     }
@@ -121,7 +126,7 @@
         document.body.removeChild(linkElem);
       }
     } else {
-      console.error(i18n('vxe.error.notExp'));
+      console.error(_vxetable.t('vxe.error.notExp'));
     }
   }
 
@@ -201,14 +206,14 @@
         });
 
         if (options.message !== false) {
-          $table.$XModal.message({
-            message: _xeUtils["default"].template(i18n('vxe.table.impSuccess'), [rows.length]),
+          _vxetable.modal.message({
+            message: _xeUtils["default"].template(_vxetable.t('vxe.table.impSuccess'), [rows.length]),
             status: 'success'
           });
         }
       } else if (options.message !== false) {
-        $table.$XModal.message({
-          message: i18n('vxe.error.impFields'),
+        _vxetable.modal.message({
+          message: _vxetable.t('vxe.error.impFields'),
           status: 'error'
         });
       }
@@ -243,23 +248,18 @@
 
   var VXETablePluginExportXLSX = {
     install: function install(xtable) {
+      var interceptor = xtable.interceptor;
+      _vxetable = xtable;
       Object.assign(xtable.types, {
         xlsx: 1
       });
-      xtable.interceptor.mixin({
+      interceptor.mixin({
         'event.import': handleImportEvent,
         'event.export': handleExportEvent
       });
-      VXETablePluginExportXLSX.t = xtable.t;
     }
   };
   _exports.VXETablePluginExportXLSX = VXETablePluginExportXLSX;
-
-  function i18n(key) {
-    if (VXETablePluginExportXLSX.t) {
-      return VXETablePluginExportXLSX.t(key);
-    }
-  }
 
   if (typeof window !== 'undefined' && window.VXETable) {
     window.VXETable.use(VXETablePluginExportXLSX);
