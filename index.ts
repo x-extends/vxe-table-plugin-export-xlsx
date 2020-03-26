@@ -40,7 +40,7 @@ function exportXLSX (params: InterceptorExportParams) {
     const { footerData } = $table.getTableData()
     const footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
     footers.forEach((rows) => {
-      const item: any = {}
+      const item: { [key: string]: any } = {}
       columns.forEach((column) => {
         item[column.id] = getFooterCellValue($table, options, rows, column)
       })
@@ -92,7 +92,7 @@ function parseCsv (columns: ColumnConfig[], content: string) {
     list[0].split(',').map(replaceDoubleQuotation)
     rList.forEach((r) => {
       if (r) {
-        const item: any = {}
+        const item: { [key: string]: any } = {}
         r.split(',').forEach((val, colIndex) => {
           if (fields[colIndex]) {
             item[fields[colIndex]] = replaceDoubleQuotation(val)
