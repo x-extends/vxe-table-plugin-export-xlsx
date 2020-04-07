@@ -14,13 +14,13 @@ import XLSX from 'xlsx'
 let _vxetable: typeof VXETable
 
 function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
-  var cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
+  const cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
   return cellValue
 }
 
 function toBuffer (wbout: any) {
-  let buf = new ArrayBuffer(wbout.length)
-  let view = new Uint8Array(buf)
+  const buf = new ArrayBuffer(wbout.length)
+  const view = new Uint8Array(buf)
   for (let index = 0; index !== wbout.length; ++index) view[index] = wbout.charCodeAt(index) & 0xFF
   return buf
 }
@@ -66,7 +66,7 @@ function downloadFile (blob: Blob, options: ExportOptons) {
     if (navigator.msSaveBlob) {
       navigator.msSaveBlob(blob, `${filename}.${type}`)
     } else {
-      var linkElem = document.createElement('a')
+      const linkElem = document.createElement('a')
       linkElem.target = '_blank'
       linkElem.download = `${filename}.${type}`
       linkElem.href = URL.createObjectURL(blob)
@@ -106,9 +106,9 @@ function parseCsv (columns: ColumnConfig[], content: string) {
 }
 
 function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]) {
-  let tableFields: string[] = []
+  const tableFields: string[] = []
   columns.forEach((column) => {
-    let field = column.property
+    const field = column.property
     if (field) {
       tableFields.push(field)
     }
