@@ -18,6 +18,7 @@ npm install xe-utils vxe-table vxe-table-plugin-export-xlsx xlsx
 import Vue from 'vue'
 import VXETable from 'vxe-table'
 import VXETablePluginExportXLSX from 'vxe-table-plugin-export-xlsx'
+import 'vxe-table/lib/index.css'
 
 Vue.use(VXETable)
 VXETable.use(VXETablePluginExportXLSX)

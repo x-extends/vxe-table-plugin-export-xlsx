@@ -27,7 +27,7 @@ function toBuffer (wbout: any) {
 
 function exportXLSX (params: InterceptorExportParams) {
   const { $table, options, columns, datas } = params
-  const { sheetName, type, isHeader, isFooter, original, message, footerFilterMethod } = options
+  const { sheetName, isHeader, isFooter, original, message, footerFilterMethod } = options
   const colHead: { [key: string]: any } = {}
   const footList: { [key: string]: any }[] = []
   const rowList = datas
@@ -51,7 +51,7 @@ function exportXLSX (params: InterceptorExportParams) {
   const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
   // 转换数据
   XLSX.utils.book_append_sheet(book, sheet, sheetName)
-  const wbout = XLSX.write(book, { bookType: type, bookSST: false, type: 'binary' })
+  const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })
   const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
   // 保存导出
   downloadFile(blob, options)

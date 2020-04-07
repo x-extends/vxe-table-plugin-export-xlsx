@@ -50,7 +50,6 @@
         columns = params.columns,
         datas = params.datas;
     var sheetName = options.sheetName,
-        type = options.type,
         isHeader = options.isHeader,
         isFooter = options.isFooter,
         original = options.original,
@@ -90,7 +89,7 @@
     _xlsx["default"].utils.book_append_sheet(book, sheet, sheetName);
 
     var wbout = _xlsx["default"].write(book, {
-      bookType: type,
+      bookType: 'xlsx',
       bookSST: false,
       type: 'binary'
     });
