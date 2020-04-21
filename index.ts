@@ -31,9 +31,13 @@ function exportXLSX (params: InterceptorExportParams) {
   const colHead: { [key: string]: any } = {}
   const footList: { [key: string]: any }[] = []
   const rowList = datas
+  const sheetCols: any[] = []
   if (isHeader) {
     columns.forEach((column) => {
       colHead[column.id] = XEUtils.toString(original ? column.property : column.getTitle())
+      sheetCols.push({
+        wpx: column.renderWidth
+      })
     })
   }
   if (isFooter) {
@@ -49,6 +53,8 @@ function exportXLSX (params: InterceptorExportParams) {
   }
   const book = XLSX.utils.book_new()
   const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
+  // 列宽
+  sheet['!cols'] = sheetCols
   // 转换数据
   XLSX.utils.book_append_sheet(book, sheet, sheetName)
   const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })

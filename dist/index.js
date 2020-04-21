@@ -58,10 +58,14 @@
     var colHead = {};
     var footList = [];
     var rowList = datas;
+    var sheetCols = [];
 
     if (isHeader) {
       columns.forEach(function (column) {
         colHead[column.id] = _xeUtils["default"].toString(original ? column.property : column.getTitle());
+        sheetCols.push({
+          wpx: column.renderWidth
+        });
       });
     }
 
@@ -83,8 +87,10 @@
 
     var sheet = _xlsx["default"].utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
       skipHeader: true
-    }); // 转换数据
+    }); // 列宽
 
+
+    sheet['!cols'] = sheetCols; // 转换数据
 
     _xlsx["default"].utils.book_append_sheet(book, sheet, sheetName);
 
