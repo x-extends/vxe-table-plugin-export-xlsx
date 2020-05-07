@@ -28,8 +28,7 @@
   var _vxetable;
 
   function getFooterCellValue($table, opts, rows, column) {
-    var cellValue = _xeUtils["default"].toString(rows[$table.$getColumnIndex(column)]);
-
+    var cellValue = rows[$table.$getColumnIndex(column)];
     return cellValue;
   }
 
@@ -57,17 +56,27 @@
         footerFilterMethod = options.footerFilterMethod;
     var colHead = {};
     var footList = [];
-    var rowList = datas;
     var sheetCols = [];
 
     if (isHeader) {
       columns.forEach(function (column) {
-        colHead[column.id] = _xeUtils["default"].toString(original ? column.property : column.getTitle());
+        colHead[column.id] = original ? column.property : column.getTitle();
         sheetCols.push({
           wpx: column.renderWidth
         });
       });
     }
+
+    var rowList = datas.map(function (item) {
+      columns.forEach(function (column) {
+        var cellValue = item[column.id];
+
+        if (cellValue !== '' && !isNaN(cellValue)) {
+          item[column.id] = Number(cellValue);
+        }
+      });
+      return item;
+    });
 
     if (isFooter) {
       var _$table$getTableData = $table.getTableData(),

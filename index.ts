@@ -14,7 +14,7 @@ import XLSX from 'xlsx'
 let _vxetable: typeof VXETable
 
 function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
-  const cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
+  const cellValue = rows[$table.$getColumnIndex(column)]
   return cellValue
 }
 
@@ -30,16 +30,24 @@ function exportXLSX (params: InterceptorExportParams) {
   const { sheetName, isHeader, isFooter, original, message, footerFilterMethod } = options
   const colHead: { [key: string]: any } = {}
   const footList: { [key: string]: any }[] = []
-  const rowList = datas
   const sheetCols: any[] = []
   if (isHeader) {
     columns.forEach((column) => {
-      colHead[column.id] = XEUtils.toString(original ? column.property : column.getTitle())
+      colHead[column.id] = original ? column.property : column.getTitle()
       sheetCols.push({
         wpx: column.renderWidth
       })
     })
   }
+  const rowList = datas.map(item => {
+    columns.forEach((column) => {
+      const cellValue = item[column.id]
+      if (cellValue !== '' && !isNaN(cellValue)) {
+        item[column.id] = Number(cellValue)
+      }
+    })
+    return item
+  })
   if (isFooter) {
     const { footerData } = $table.getTableData()
     const footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
