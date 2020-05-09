@@ -25,6 +25,26 @@ function toBuffer (wbout: any) {
   return buf
 }
 
+function getCellLabel (column: ColumnConfig, cellValue: any) {
+  if (cellValue) {
+    switch (column.cellType) {
+      case 'string':
+        break
+      case 'number':
+        if (!isNaN(cellValue)) {
+          return Number(cellValue)
+        }
+        break
+      default:
+        if (cellValue.length < 17 && !isNaN(cellValue)) {
+          return Number(cellValue)
+        }
+        break
+    }
+  }
+  return cellValue
+}
+
 function exportXLSX (params: InterceptorExportParams) {
   const { $table, options, columns, datas } = params
   const { sheetName, isHeader, isFooter, original, message, footerFilterMethod } = options
@@ -41,10 +61,7 @@ function exportXLSX (params: InterceptorExportParams) {
   }
   const rowList = datas.map(item => {
     columns.forEach((column) => {
-      const cellValue = item[column.id]
-      if (cellValue !== '' && !isNaN(cellValue)) {
-        item[column.id] = Number(cellValue)
-      }
+      item[column.id] = getCellLabel(column, item[column.id])
     })
     return item
   })

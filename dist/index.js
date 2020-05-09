@@ -43,6 +43,31 @@
     return buf;
   }
 
+  function getCellLabel(column, cellValue) {
+    if (cellValue) {
+      switch (column.cellType) {
+        case 'string':
+          break;
+
+        case 'number':
+          if (!isNaN(cellValue)) {
+            return Number(cellValue);
+          }
+
+          break;
+
+        default:
+          if (cellValue.length < 17 && !isNaN(cellValue)) {
+            return Number(cellValue);
+          }
+
+          break;
+      }
+    }
+
+    return cellValue;
+  }
+
   function exportXLSX(params) {
     var $table = params.$table,
         options = params.options,
@@ -69,11 +94,7 @@
 
     var rowList = datas.map(function (item) {
       columns.forEach(function (column) {
-        var cellValue = item[column.id];
-
-        if (cellValue !== '' && !isNaN(cellValue)) {
-          item[column.id] = Number(cellValue);
-        }
+        item[column.id] = getCellLabel(column, item[column.id]);
       });
       return item;
     });
