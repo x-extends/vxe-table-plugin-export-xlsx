@@ -87,7 +87,7 @@
       columns.forEach(function (column) {
         colHead[column.id] = original ? column.property : column.getTitle();
         sheetCols.push({
-          wpx: column.renderWidth
+          wpx: _xeUtils["default"].toInteger(column.renderWidth * 0.8)
         });
       });
     }

@@ -55,7 +55,7 @@ function exportXLSX (params: InterceptorExportParams) {
     columns.forEach((column) => {
       colHead[column.id] = original ? column.property : column.getTitle()
       sheetCols.push({
-        wpx: column.renderWidth
+        wpx: XEUtils.toInteger(column.renderWidth * 0.8)
       })
     })
   }
