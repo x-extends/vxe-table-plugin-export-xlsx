@@ -57,7 +57,7 @@
           break;
 
         default:
-          if (cellValue.length < 17 && !isNaN(cellValue)) {
+          if (cellValue.length < 12 && !isNaN(cellValue)) {
             return Number(cellValue);
           }
 
