@@ -69,6 +69,7 @@
   }
 
   function exportXLSX(params) {
+    var msgKey = 'xlsx';
     var $table = params.$table,
         options = params.options,
         columns = params.columns,
@@ -77,8 +78,8 @@
         isHeader = options.isHeader,
         isFooter = options.isFooter,
         original = options.original,
-        message = options.message,
         footerFilterMethod = options.footerFilterMethod;
+    var showMsg = options.message !== false;
     var colHead = {};
     var footList = [];
     var sheetCols = [];
@@ -113,34 +114,51 @@
       });
     }
 
-    var book = _xlsx["default"].utils.book_new();
+    var exportMethod = function exportMethod() {
+      var book = _xlsx["default"].utils.book_new();
 
-    var sheet = _xlsx["default"].utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
-      skipHeader: true
-    }); // 列宽
+      var sheet = _xlsx["default"].utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
+        skipHeader: true
+      }); // 列宽
 
 
-    sheet['!cols'] = sheetCols; // 转换数据
+      sheet['!cols'] = sheetCols; // 转换数据
 
-    _xlsx["default"].utils.book_append_sheet(book, sheet, sheetName);
+      _xlsx["default"].utils.book_append_sheet(book, sheet, sheetName);
 
-    var wbout = _xlsx["default"].write(book, {
-      bookType: 'xlsx',
-      bookSST: false,
-      type: 'binary'
-    });
-
-    var blob = new Blob([toBuffer(wbout)], {
-      type: 'application/octet-stream'
-    }); // 保存导出
-
-    downloadFile(blob, options);
-
-    if (message !== false) {
-      _vxetable.modal.message({
-        message: _vxetable.t('vxe.table.expSuccess'),
-        status: 'success'
+      var wbout = _xlsx["default"].write(book, {
+        bookType: 'xlsx',
+        bookSST: false,
+        type: 'binary'
       });
+
+      var blob = new Blob([toBuffer(wbout)], {
+        type: 'application/octet-stream'
+      }); // 保存导出
+
+      downloadFile(blob, options);
+
+      if (showMsg) {
+        _vxetable.modal.close(msgKey);
+
+        _vxetable.modal.message({
+          message: _vxetable.t('vxe.table.expSuccess'),
+          status: 'success'
+        });
+      }
+    };
+
+    if (showMsg) {
+      _vxetable.modal.message({
+        id: msgKey,
+        message: _vxetable.t('vxe.table.expLoading'),
+        status: 'loading',
+        duration: -1
+      });
+
+      setTimeout(exportMethod, 1000);
+    } else {
+      exportMethod();
     }
   }
 
@@ -214,6 +232,7 @@
     var columns = params.columns,
         options = params.options,
         file = params.file;
+    var showMsg = options.message !== false;
     var $table = params.$table;
     var _importResolve = $table._importResolve;
     var fileReader = new FileReader();
@@ -240,17 +259,19 @@
           }
         });
 
-        if (options.message !== false) {
+        if (showMsg) {
           _vxetable.modal.message({
             message: _xeUtils["default"].template(_vxetable.t('vxe.table.impSuccess'), [rows.length]),
             status: 'success'
           });
         }
-      } else if (options.message !== false) {
-        _vxetable.modal.message({
-          message: _vxetable.t('vxe.error.impFields'),
-          status: 'error'
-        });
+      } else {
+        if (showMsg) {
+          _vxetable.modal.message({
+            message: _vxetable.t('vxe.error.impFields'),
+            status: 'error'
+          });
+        }
       }
 
       if (_importResolve) {

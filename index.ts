@@ -46,8 +46,10 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
 }
 
 function exportXLSX (params: InterceptorExportParams) {
+  const msgKey = 'xlsx'
   const { $table, options, columns, datas } = params
-  const { sheetName, isHeader, isFooter, original, message, footerFilterMethod } = options
+  const { sheetName, isHeader, isFooter, original, footerFilterMethod } = options
+  const showMsg = options.message !== false
   const colHead: { [key: string]: any } = {}
   const footList: { [key: string]: any }[] = []
   const sheetCols: any[] = []
@@ -76,18 +78,27 @@ function exportXLSX (params: InterceptorExportParams) {
       footList.push(item)
     })
   }
-  const book = XLSX.utils.book_new()
-  const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
-  // 列宽
-  sheet['!cols'] = sheetCols
-  // 转换数据
-  XLSX.utils.book_append_sheet(book, sheet, sheetName)
-  const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })
-  const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
-  // 保存导出
-  downloadFile(blob, options)
-  if (message !== false) {
-    _vxetable.modal.message({ message: _vxetable.t('vxe.table.expSuccess'), status: 'success' })
+  const exportMethod = () => {
+    const book = XLSX.utils.book_new()
+    const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
+    // 列宽
+    sheet['!cols'] = sheetCols
+    // 转换数据
+    XLSX.utils.book_append_sheet(book, sheet, sheetName)
+    const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })
+    const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
+    // 保存导出
+    downloadFile(blob, options)
+    if (showMsg) {
+      _vxetable.modal.close(msgKey)
+      _vxetable.modal.message({ message: _vxetable.t('vxe.table.expSuccess'), status: 'success' })
+    }
+  }
+  if (showMsg) {
+    _vxetable.modal.message({ id: msgKey, message: _vxetable.t('vxe.table.expLoading'), status: 'loading', duration: -1 })
+    setTimeout(exportMethod, 1000)
+  } else {
+    exportMethod()
   }
 }
 
@@ -149,6 +160,7 @@ function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]
 
 function importXLSX (params: InterceptorImportParams) {
   const { columns, options, file } = params
+  const showMsg = options.message !== false
   const $table: any = params.$table
   const { _importResolve } = $table
   const fileReader = new FileReader()
@@ -166,11 +178,13 @@ function importXLSX (params: InterceptorImportParams) {
             $table.reloadData(data)
           }
         })
-      if (options.message !== false) {
+      if (showMsg) {
         _vxetable.modal.message({ message: XEUtils.template(_vxetable.t('vxe.table.impSuccess'), [rows.length]), status: 'success' })
       }
-    } else if (options.message !== false) {
-      _vxetable.modal.message({ message: _vxetable.t('vxe.error.impFields'), status: 'error' })
+    } else {
+      if (showMsg) {
+        _vxetable.modal.message({ message: _vxetable.t('vxe.error.impFields'), status: 'error' })
+      }
     }
     if (_importResolve) {
       _importResolve(status)
