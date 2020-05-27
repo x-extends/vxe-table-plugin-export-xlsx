@@ -81,13 +81,13 @@ function exportXLSX (params: InterceptorExportParams) {
   const exportMethod = () => {
     const book = XLSX.utils.book_new()
     const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
-    // 列宽
+    // 设置列宽
     sheet['!cols'] = sheetCols
     // 转换数据
     XLSX.utils.book_append_sheet(book, sheet, sheetName)
     const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })
     const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
-    // 保存导出
+    // 导出 xlsx
     downloadFile(blob, options)
     if (showMsg) {
       _vxetable.modal.close(msgKey)
@@ -96,7 +96,7 @@ function exportXLSX (params: InterceptorExportParams) {
   }
   if (showMsg) {
     _vxetable.modal.message({ id: msgKey, message: _vxetable.t('vxe.table.expLoading'), status: 'loading', duration: -1 })
-    setTimeout(exportMethod, 1000)
+    setTimeout(exportMethod, 1500)
   } else {
     exportMethod()
   }

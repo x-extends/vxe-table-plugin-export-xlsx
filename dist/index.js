@@ -119,7 +119,7 @@
 
       var sheet = _xlsx["default"].utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
         skipHeader: true
-      }); // 列宽
+      }); // 设置列宽
 
 
       sheet['!cols'] = sheetCols; // 转换数据
@@ -134,7 +134,7 @@
 
       var blob = new Blob([toBuffer(wbout)], {
         type: 'application/octet-stream'
-      }); // 保存导出
+      }); // 导出 xlsx
 
       downloadFile(blob, options);
 
@@ -156,7 +156,7 @@
         duration: -1
       });
 
-      setTimeout(exportMethod, 1000);
+      setTimeout(exportMethod, 1500);
     } else {
       exportMethod();
     }
