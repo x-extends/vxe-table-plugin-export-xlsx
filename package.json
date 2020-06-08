@@ -54,7 +54,7 @@
   },
   "peerDependencies": {
     "vxe-table": ">= 2.9.0",
-    "xe-utils": ">= 2.4.0",
+    "xe-utils": ">= 2.4.0 < 3",
     "xlsx": ">= 0.15.0"
   },
   "repository": {
