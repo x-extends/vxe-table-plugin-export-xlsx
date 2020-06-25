@@ -59,7 +59,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx.git"
+    "url": "git+https://github.com/x-extends/vxe-table-plugin-export-xlsx.git"
   },
   "keywords": [
     "vxe-table-plugin-export-xlsx"
@@ -70,7 +70,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx/issues"
+    "url": "https://github.com/x-extends/vxe-table-plugin-export-xlsx/issues"
   },
-  "homepage": "https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx#readme"
+  "homepage": "https://github.com/x-extends/vxe-table-plugin-export-xlsx#readme"
 }
