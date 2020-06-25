@@ -32,7 +32,6 @@ VXETable.use(VXETablePluginExportXLSX)
 </vxe-toolbar>
 
 <vxe-table
-  border
   ref="xTable"
   height="600"
   :data="tableData">
