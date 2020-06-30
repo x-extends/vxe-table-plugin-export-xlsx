@@ -49,12 +49,11 @@
     "typescript": "^3.9.3",
     "vue": "^2.6.11",
     "vxe-table": "^2.9.14",
-    "xe-utils": "^2.5.0",
+    "xe-utils": "^2.6.2",
     "xlsx": "^0.15.6"
   },
   "peerDependencies": {
     "vxe-table": ">= 2.9.0",
-    "xe-utils": ">= 2.4.0 < 3",
     "xlsx": ">= 0.15.0"
   },
   "repository": {
