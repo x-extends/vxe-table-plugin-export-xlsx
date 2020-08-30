@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import XEUtils from 'xe-utils/methods/xe-utils'
+import XEUtils from 'xe-utils/ctor'
 import {
   VXETable,
   Table,
