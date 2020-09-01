@@ -11,11 +11,14 @@ import {
 import XLSX from 'xlsx'
 /* eslint-enable no-unused-vars */
 
-let _vxetable: typeof VXETable
-
 function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
   const cellValue = rows[$table.$getColumnIndex(column)]
   return cellValue
+}
+
+function getFooterData (opts: ExportOptons, footerData: any[][]) {
+  const { footerFilterMethod } = opts
+  return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
 
 function toBuffer (wbout: any) {
@@ -48,8 +51,10 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
 function exportXLSX (params: InterceptorExportParams) {
   const msgKey = 'xlsx'
   const { $table, options, columns, datas } = params
-  const { sheetName, isHeader, isFooter, original, footerFilterMethod } = options
-  const showMsg = options.message !== false
+  const { $vxe } = $table
+  const { modal, t } = $vxe
+  const { message, sheetName, isHeader, isFooter, original } = options
+  const showMsg = message !== false
   const colHead: { [key: string]: any } = {}
   const footList: { [key: string]: any }[] = []
   const sheetCols: any[] = []
@@ -69,7 +74,7 @@ function exportXLSX (params: InterceptorExportParams) {
   })
   if (isFooter) {
     const { footerData } = $table.getTableData()
-    const footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
+    const footers = getFooterData(options, footerData)
     footers.forEach((rows) => {
       const item: { [key: string]: any } = {}
       columns.forEach((column) => {
@@ -88,23 +93,27 @@ function exportXLSX (params: InterceptorExportParams) {
     const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })
     const blob = new Blob([toBuffer(wbout)], { type: 'application/octet-stream' })
     // 导出 xlsx
-    downloadFile(blob, options)
+    downloadFile(params, blob, options)
     if (showMsg) {
-      _vxetable.modal.close(msgKey)
-      _vxetable.modal.message({ message: _vxetable.t('vxe.table.expSuccess'), status: 'success' })
+      modal.close(msgKey)
+      modal.message({ message: t('vxe.table.expSuccess'), status: 'success' })
     }
   }
   if (showMsg) {
-    _vxetable.modal.message({ id: msgKey, message: _vxetable.t('vxe.table.expLoading'), status: 'loading', duration: -1 })
+    modal.message({ id: msgKey, message: t('vxe.table.expLoading'), status: 'loading', duration: -1 })
     setTimeout(exportMethod, 1500)
   } else {
     exportMethod()
   }
 }
 
-function downloadFile (blob: Blob, options: ExportOptons) {
+function downloadFile (params: InterceptorExportParams, blob: Blob, options: ExportOptons) {
+  const { $table } = params
+  const { $vxe } = $table
+  const { modal, t } = $vxe
+  const { message, filename, type } = options
+  const showMsg = message !== false
   if (window.Blob) {
-    const { filename, type } = options
     if (navigator.msSaveBlob) {
       navigator.msSaveBlob(blob, `${filename}.${type}`)
     } else {
@@ -117,7 +126,9 @@ function downloadFile (blob: Blob, options: ExportOptons) {
       document.body.removeChild(linkElem)
     }
   } else {
-    console.error(_vxetable.t('vxe.error.notExp'))
+    if (showMsg) {
+      modal.alert({ message: t('vxe.error.notExp'), status: 'error' })
+    }
   }
 }
 
@@ -158,11 +169,17 @@ function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]
   return tableFields.every((field) => fields.includes(field))
 }
 
+declare module 'vxe-table/lib/vxe-table' {
+  interface Table {
+    _importResolve?: any;
+  }
+}
+
 function importXLSX (params: InterceptorImportParams) {
-  const { columns, options, file } = params
+  const { $table, columns, options, file } = params
+  const { $vxe, _importResolve } = $table
+  const { modal, t } = $vxe
   const showMsg = options.message !== false
-  const $table: any = params.$table
-  const { _importResolve } = $table
   const fileReader = new FileReader()
   fileReader.onload = (e: any) => {
     const workbook = XLSX.read(e.target.result, { type: 'binary' })
@@ -179,11 +196,11 @@ function importXLSX (params: InterceptorImportParams) {
           }
         })
       if (showMsg) {
-        _vxetable.modal.message({ message: XEUtils.template(_vxetable.t('vxe.table.impSuccess'), [rows.length]), status: 'success' })
+        modal.message({ message: XEUtils.template(t('vxe.table.impSuccess'), [rows.length]), status: 'success' })
       }
     } else {
       if (showMsg) {
-        _vxetable.modal.message({ message: _vxetable.t('vxe.error.impFields'), status: 'error' })
+        modal.message({ message: t('vxe.error.impFields'), status: 'error' })
       }
     }
     if (_importResolve) {
@@ -208,14 +225,19 @@ function handleExportEvent (params: InterceptorExportParams) {
   }
 }
 
+declare module 'vxe-table/lib/vxe-table' {
+  interface VXETableTypes {
+    xlsx: number;
+  }
+}
+
 /**
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
-  install (xtable: typeof VXETable) {
-    const { interceptor } = xtable
-    _vxetable = xtable
-    Object.assign(xtable.types, { xlsx: 1 })
+  install (vxetable: typeof VXETable) {
+    const { interceptor } = vxetable
+    vxetable.types.xlsx = 1
     interceptor.mixin({
       'event.import': handleImportEvent,
       'event.export': handleExportEvent
