@@ -1,6 +1,6 @@
 {
   "name": "vxe-table-plugin-export-xlsx",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "基于 vxe-table 表格的增强插件，支持导出 xlsx 格式",
   "scripts": {
     "lib": "gulp build"
@@ -11,9 +11,9 @@
     "*.d.ts"
   ],
   "main": "dist/index.common.js",
+  "unpkg": "dist/index.umd.min.js",
+  "jsdelivr": "dist/index.umd.min.js",
   "style": "dist/style.min.css",
-  "unpkg": "dist/index.min.js",
-  "jsdelivr": "dist/index.min.js",
   "typings": "index.ts",
   "devDependencies": {
     "@babel/core": "^7.4.4",
@@ -48,8 +48,8 @@
     "prettier": "^1.18.2",
     "typescript": "^3.9.3",
     "vue": "^2.6.11",
-    "vxe-table": "^2.9.19",
-    "xe-utils": "^2.7.8",
+    "vxe-table": "^2.9.21",
+    "xe-utils": "^2.7.11",
     "xlsx": "^0.16.6"
   },
   "peerDependencies": {

@@ -58,10 +58,17 @@ gulp.task('build_umd', function () {
       ]
     }))
     .pipe(replace(`global.${exportModuleName} = mod.exports;`, `global.${exportModuleName} = mod.exports.default;`))
+    .pipe(rename({
+      basename: 'index',
+      suffix: '.umd',
+      extname: '.js'
+    }))
     .pipe(gulp.dest('dist'))
     .pipe(uglify())
     .pipe(rename({
-      extname: '.min.js'
+      basename: 'index',
+      suffix: '.umd.min',
+      extname: '.js'
     }))
     .pipe(gulp.dest('dist'))
 })
