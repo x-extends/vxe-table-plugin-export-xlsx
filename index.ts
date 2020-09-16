@@ -85,7 +85,8 @@ function exportXLSX (params: InterceptorExportParams) {
   }
   const exportMethod = () => {
     const book = XLSX.utils.book_new()
-    const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
+    const list = (isHeader ? [colHead] : []).concat(rowList).concat(footList)
+    const sheet = XLSX.utils.json_to_sheet(list.length ? list : [{}], { skipHeader: true })
     // 设置列宽
     sheet['!cols'] = sheetCols
     // 转换数据
