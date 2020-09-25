@@ -238,7 +238,16 @@ declare module 'vxe-table/lib/vxe-table' {
 export const VXETablePluginExportXLSX = {
   install (vxetable: typeof VXETable) {
     const { interceptor } = vxetable
-    vxetable.types.xlsx = 1
+    if (vxetable.types) {
+      vxetable.types.xlsx = 1
+    }
+    vxetable.setup({
+      export: {
+        types: {
+          xlsx: 0
+        }
+      }
+    })
     interceptor.mixin({
       'event.import': handleImportEvent,
       'event.export': handleExportEvent
