@@ -48,30 +48,96 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
   return cellValue
 }
 
+declare module 'vxe-table/lib/vxe-table' {
+  interface ColumnInfo {
+    _row: any;
+    _colSpan: number;
+    _rowSpan: number;
+    childNodes: ColumnConfig[];
+  }
+}
+
+function getValidColumn(column: ColumnConfig): ColumnConfig {
+  const { childNodes } = column
+  const isColGroup = childNodes && childNodes.length
+  if (isColGroup) {
+    return getValidColumn(childNodes[0])
+  }
+  return column
+}
+
 function exportXLSX (params: InterceptorExportParams) {
   const msgKey = 'xlsx'
-  const { $table, options, columns, datas } = params
+  const { $table, options, columns, colgroups, datas } = params
   const { $vxe } = $table
   const { modal, t } = $vxe
-  const { message, sheetName, isHeader, isFooter, original } = options
+  const { message, sheetName, isHeader, isFooter, isMerge, isColgroup, original } = options
   const showMsg = message !== false
-  const colHead: { [key: string]: any } = {}
-  const footList: { [key: string]: any }[] = []
+  const mergeCells = $table.getMergeCells()
+  const colList: any[] = []
+  const footList: any[] = []
   const sheetCols: any[] = []
+  const sheetMerges: any[] = []
+  // 处理表头
   if (isHeader) {
+    const colHead: any = {}
     columns.forEach((column) => {
       colHead[column.id] = original ? column.property : column.getTitle()
       sheetCols.push({
         wpx: XEUtils.toInteger(column.renderWidth * 0.8)
       })
     })
+    if (isColgroup && !original && colgroups) {
+      colgroups.forEach((cols, rIndex) => {
+        let groupHead: any = {}
+        columns.forEach((column) => {
+          groupHead[column.id] = null
+        })
+        cols.forEach((column) => {
+          const { _colSpan, _rowSpan } = column
+          const validColumn = getValidColumn(column)
+          const columnIndex = columns.indexOf(validColumn)
+          groupHead[validColumn.id] = original ? validColumn.property : column.getTitle()
+          if (_colSpan > 1 || _rowSpan > 1) {
+            sheetMerges.push({
+              s: { r: rIndex, c: columnIndex },
+              e: { r: rIndex + _rowSpan - 1, c: columnIndex + _colSpan - 1 }
+            })
+          }
+        })
+        colList.push(groupHead)
+      })
+    } else {
+      colList.push(colHead)
+    }
+  }
+  // 处理合并
+  if (isMerge && !original) {
+    mergeCells.forEach(mergeItem => {
+      let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
+      for (let rIndex = 0; rIndex < datas.length; rIndex++) {
+        let rowIndex = $table._getRowIndex(datas[rIndex]._row)
+        if (rowIndex === mergeRowIndex) {
+          if (isHeader && colgroups) {
+            rowIndex = rIndex + colgroups.length
+          }
+          sheetMerges.push({
+            s: { r: rowIndex, c: mergeColIndex },
+            e: { r: rowIndex + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
+          })
+          break
+        }
+      }
+    })
   }
   const rowList = datas.map(item => {
+    const rest: any = {}
     columns.forEach((column) => {
-      item[column.id] = getCellLabel(column, item[column.id])
+      rest[column.id] = getCellLabel(column, item[column.id])
     })
-    return item
+    return rest
   })
+  // 处理表尾
   if (isFooter) {
     const { footerData } = $table.getTableData()
     const footers = getFooterData(options, footerData)
@@ -85,10 +151,10 @@ function exportXLSX (params: InterceptorExportParams) {
   }
   const exportMethod = () => {
     const book = XLSX.utils.book_new()
-    const list = (isHeader ? [colHead] : []).concat(rowList).concat(footList)
+    const list = (isHeader ? colList : []).concat(rowList).concat(footList)
     const sheet = XLSX.utils.json_to_sheet(list.length ? list : [{}], { skipHeader: true })
-    // 设置列宽
     sheet['!cols'] = sheetCols
+    sheet['!merges'] = sheetMerges
     // 转换数据
     XLSX.utils.book_append_sheet(book, sheet, sheetName)
     const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })
@@ -227,6 +293,9 @@ function handleExportEvent (params: InterceptorExportParams) {
 }
 
 declare module 'vxe-table/lib/vxe-table' {
+  interface VXETableStatic {
+    types: any;
+  }
   interface VXETableTypes {
     xlsx: number;
   }
