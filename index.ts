@@ -57,7 +57,7 @@ declare module 'vxe-table/lib/vxe-table' {
   }
 }
 
-function getValidColumn(column: ColumnConfig): ColumnConfig {
+function getValidColumn (column: ColumnConfig): ColumnConfig {
   const { childNodes } = column
   const isColGroup = childNodes && childNodes.length
   if (isColGroup) {
@@ -76,8 +76,8 @@ function exportXLSX (params: InterceptorExportParams) {
   const mergeCells = $table.getMergeCells()
   const colList: any[] = []
   const footList: any[] = []
-  const sheetCols: any[] = []
-  const sheetMerges: any[] = []
+  const sheetCols: { wpx: number }[] = []
+  const sheetMerges: { s: { r: number, c: number }, e: { r: number, c: number } }[] = []
   // 处理表头
   if (isHeader) {
     const colHead: any = {}
@@ -142,7 +142,7 @@ function exportXLSX (params: InterceptorExportParams) {
     const { footerData } = $table.getTableData()
     const footers = getFooterData(options, footerData)
     footers.forEach((rows) => {
-      const item: { [key: string]: any } = {}
+      const item: any = {}
       columns.forEach((column) => {
         item[column.id] = getFooterCellValue($table, options, rows, column)
       })
