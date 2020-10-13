@@ -238,7 +238,7 @@ function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]
 
 declare module 'vxe-table/lib/vxe-table' {
   interface Table {
-    _importResolve?: any;
+    _importResolve?: Function | null;
   }
 }
 
@@ -263,7 +263,7 @@ function importXLSX (params: InterceptorImportParams) {
           }
         })
       if (showMsg) {
-        modal.message({ message: XEUtils.template(t('vxe.table.impSuccess'), [rows.length]), status: 'success' })
+        modal.message({ message: t('vxe.table.impSuccess', [rows.length]), status: 'success' })
       }
     } else {
       if (showMsg) {
@@ -292,24 +292,12 @@ function handleExportEvent (params: InterceptorExportParams) {
   }
 }
 
-declare module 'vxe-table/lib/vxe-table' {
-  interface VXETableStatic {
-    types: any;
-  }
-  interface VXETableTypes {
-    xlsx: number;
-  }
-}
-
 /**
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
   install (vxetable: typeof VXETable) {
     const { interceptor } = vxetable
-    if (vxetable.types) {
-      vxetable.types.xlsx = 1
-    }
     vxetable.setup({
       export: {
         types: {
