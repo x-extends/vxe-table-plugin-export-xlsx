@@ -4,6 +4,7 @@ declare module 'xlsx' {
     book_new(): any;
     json_to_sheet(list: any[], options: any): any;
     sheet_to_csv(Sheet: any): any;
+    sheet_to_json(Sheet: any): any[];
     book_append_sheet(book: any, sheet: any, sheetName?: string): any;
   }
   interface XLSXMethods {

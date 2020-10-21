@@ -199,55 +199,6 @@ function downloadFile (params: InterceptorExportParams, blob: Blob, options: Exp
   }
 }
 
-function getTxtCellKey (now: any) {
-  return `#${now}@${XEUtils.uniqueId()}`
-}
-
-function replaceTxtCell (cell: any, vMaps: any) {
-  return cell.replace(/#\d+@\d+/g, (key: any) => XEUtils.hasOwnProp(vMaps, key) ? vMaps[key] : key)
-}
-
-function getTxtCellValue (val: any, vMaps: any) {
-  const rest = replaceTxtCell(val, vMaps)
-  return rest.replace(/^"+$/g, (qVal: any) => '"'.repeat(Math.ceil(qVal.length / 2)))
-}
-
-function parseCsvAndTxt (columns: any, content: any, cellSeparator: any) {
-  const list = content.split('\n')
-  const rows: any = []
-  let fields: any = []
-  if (list.length) {
-    const vMaps: any = {}
-    const now = Date.now()
-    list.forEach((rVal: any) => {
-      if (rVal) {
-        const item: any = {}
-        rVal = rVal.replace(/""/g, () => {
-          const key = getTxtCellKey(now)
-          vMaps[key] = '"'
-          return key
-        }).replace(/"(.*?)"/g, (text: any, cVal: any) => {
-          const key = getTxtCellKey(now)
-          vMaps[key] = replaceTxtCell(cVal, vMaps)
-          return key
-        })
-        const cells = rVal.split(cellSeparator)
-        if (!fields.length) {
-          fields = cells.map((val: any) => getTxtCellValue(val.trim(), vMaps))
-        } else {
-          cells.forEach((val: any, colIndex: any) => {
-            if (colIndex < fields.length) {
-              item[fields[colIndex]] = getTxtCellValue(val, vMaps)
-            }
-          })
-          rows.push(item)
-        }
-      }
-    })
-  }
-  return { fields, rows }
-}
-
 function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]) {
   const tableFields: string[] = []
   columns.forEach((column) => {
@@ -256,7 +207,7 @@ function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]
       tableFields.push(field)
     }
   })
-  return tableFields.every((field) => fields.includes(field))
+  return fields.some(field => tableFields.indexOf(field) > -1)
 }
 
 declare module 'vxe-table/lib/vxe-table' {
@@ -272,12 +223,27 @@ function importXLSX (params: InterceptorImportParams) {
   const showMsg = options.message !== false
   const fileReader = new FileReader()
   fileReader.onload = (e: any) => {
+    const tableFields: string[] = []
+    columns.forEach((column) => {
+      const field = column.property
+      if (field) {
+        tableFields.push(field)
+      }
+    })
     const workbook = XLSX.read(e.target.result, { type: 'binary' })
-    const csvData: string = XLSX.utils.sheet_to_csv(workbook.Sheets.Sheet1)
-    const { fields, rows } = parseCsvAndTxt(columns, csvData, ',')
-    const status = checkImportData(columns, fields, rows)
+    const rest = XLSX.utils.sheet_to_json(XEUtils.first(workbook.Sheets))
+    const fields = XEUtils.keys(rest.slice(0, 1)[0])
+    const list = rest.slice(1)
+    const status = checkImportData(columns, fields, list)
     if (status) {
-      $table.createData(rows)
+      const records: any[] = list.map(item => {
+        const record: any = {}
+        tableFields.forEach(field => {
+          record[field] = XEUtils.isUndefined(item[field]) ? null : item[field]
+        })
+        return record
+      })
+      $table.createData(records)
         .then((data: any[]) => {
           if (options.mode === 'append') {
             $table.insertAt(data, -1)
@@ -286,7 +252,7 @@ function importXLSX (params: InterceptorImportParams) {
           }
         })
       if (showMsg) {
-        modal.message({ message: t('vxe.table.impSuccess', [rows.length]), status: 'success' })
+        modal.message({ message: t('vxe.table.impSuccess', [records.length]), status: 'success' })
       }
     } else {
       if (showMsg) {
