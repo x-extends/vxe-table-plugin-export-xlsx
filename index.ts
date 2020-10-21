@@ -199,14 +199,7 @@ function downloadFile (params: InterceptorExportParams, blob: Blob, options: Exp
   }
 }
 
-function checkImportData (columns: ColumnConfig[], fields: string[], rows: any[]) {
-  const tableFields: string[] = []
-  columns.forEach((column) => {
-    const field = column.property
-    if (field) {
-      tableFields.push(field)
-    }
-  })
+function checkImportData (tableFields: string[], fields: string[]) {
   return fields.some(field => tableFields.indexOf(field) > -1)
 }
 
@@ -234,7 +227,7 @@ function importXLSX (params: InterceptorImportParams) {
     const rest = XLSX.utils.sheet_to_json(XEUtils.first(workbook.Sheets))
     const fields = XEUtils.keys(rest.slice(0, 1)[0])
     const list = rest.slice(1)
-    const status = checkImportData(columns, fields, list)
+    const status = checkImportData(tableFields, fields)
     if (status) {
       const records: any[] = list.map(item => {
         const record: any = {}
