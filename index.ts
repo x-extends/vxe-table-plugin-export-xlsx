@@ -199,26 +199,49 @@ function downloadFile (params: InterceptorExportParams, blob: Blob, options: Exp
   }
 }
 
-function replaceDoubleQuotation (val: string) {
-  return val.replace(/^"/, '').replace(/"$/, '')
+function getTxtCellKey (now: any) {
+  return `#${now}@${XEUtils.uniqueId()}`
 }
 
-function parseCsv (columns: ColumnConfig[], content: string) {
+function replaceTxtCell (cell: any, vMaps: any) {
+  return cell.replace(/#\d+@\d+/g, (key: any) => XEUtils.hasOwnProp(vMaps, key) ? vMaps[key] : key)
+}
+
+function getTxtCellValue (val: any, vMaps: any) {
+  const rest = replaceTxtCell(val, vMaps)
+  return rest.replace(/^"+$/g, (qVal: any) => '"'.repeat(Math.ceil(qVal.length / 2)))
+}
+
+function parseCsvAndTxt (columns: any, content: any, cellSeparator: any) {
   const list = content.split('\n')
-  const fields: string[] = []
-  const rows: any[] = []
+  const rows: any = []
+  let fields: any = []
   if (list.length) {
-    const rList = list.slice(1)
-    list[0].split(',').map(replaceDoubleQuotation)
-    rList.forEach((r) => {
-      if (r) {
-        const item: { [key: string]: any } = {}
-        r.split(',').forEach((val, colIndex) => {
-          if (fields[colIndex]) {
-            item[fields[colIndex]] = replaceDoubleQuotation(val)
-          }
+    const vMaps: any = {}
+    const now = Date.now()
+    list.forEach((rVal: any) => {
+      if (rVal) {
+        const item: any = {}
+        rVal = rVal.replace(/""/g, () => {
+          const key = getTxtCellKey(now)
+          vMaps[key] = '"'
+          return key
+        }).replace(/"(.*?)"/g, (text: any, cVal: any) => {
+          const key = getTxtCellKey(now)
+          vMaps[key] = replaceTxtCell(cVal, vMaps)
+          return key
         })
-        rows.push(item)
+        const cells = rVal.split(cellSeparator)
+        if (!fields.length) {
+          fields = cells.map((val: any) => getTxtCellValue(val.trim(), vMaps))
+        } else {
+          cells.forEach((val: any, colIndex: any) => {
+            if (colIndex < fields.length) {
+              item[fields[colIndex]] = getTxtCellValue(val, vMaps)
+            }
+          })
+          rows.push(item)
+        }
       }
     })
   }
@@ -251,7 +274,7 @@ function importXLSX (params: InterceptorImportParams) {
   fileReader.onload = (e: any) => {
     const workbook = XLSX.read(e.target.result, { type: 'binary' })
     const csvData: string = XLSX.utils.sheet_to_csv(workbook.Sheets.Sheet1)
-    const { fields, rows } = parseCsv(columns, csvData)
+    const { fields, rows } = parseCsvAndTxt(columns, csvData, ',')
     const status = checkImportData(columns, fields, rows)
     if (status) {
       $table.createData(rows)
