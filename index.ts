@@ -206,12 +206,13 @@ function checkImportData (tableFields: string[], fields: string[]) {
 declare module 'vxe-table/lib/vxe-table' {
   interface Table {
     _importResolve?: Function | null;
+    _importReject?: Function | null;
   }
 }
 
 function importXLSX (params: InterceptorImportParams) {
   const { $table, columns, options, file } = params
-  const { $vxe, _importResolve } = $table
+  const { $vxe, _importResolve, _importReject } = $table
   const { modal, t } = $vxe
   const showMsg = options.message !== false
   const fileReader = new FileReader()
@@ -238,11 +239,17 @@ function importXLSX (params: InterceptorImportParams) {
       })
       $table.createData(records)
         .then((data: any[]) => {
-          if (options.mode === 'append') {
-            $table.insertAt(data, -1)
+          let loadRest: Promise<any>
+          if (options.mode === 'insert') {
+            loadRest = $table.insertAt(data, -1)
           } else {
-            $table.reloadData(data)
+            loadRest = $table.reloadData(data)
           }
+          return loadRest.then(() => {
+            if (_importResolve) {
+              _importResolve({ status: true })
+            }
+          })
         })
       if (showMsg) {
         modal.message({ message: t('vxe.table.impSuccess', [records.length]), status: 'success' })
@@ -251,10 +258,9 @@ function importXLSX (params: InterceptorImportParams) {
       if (showMsg) {
         modal.message({ message: t('vxe.error.impFields'), status: 'error' })
       }
-    }
-    if (_importResolve) {
-      _importResolve(status)
-      $table._importResolve = null
+      if (_importReject) {
+        _importReject({ status: false })
+      }
     }
   }
   fileReader.readAsBinaryString(file)
