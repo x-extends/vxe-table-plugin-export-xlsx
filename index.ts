@@ -226,8 +226,8 @@ function importXLSX (params: InterceptorImportParams) {
     })
     const workbook = XLSX.read(e.target.result, { type: 'binary' })
     const rest = XLSX.utils.sheet_to_json(XEUtils.first(workbook.Sheets))
-    const fields = XEUtils.keys(rest.slice(0, 1)[0])
-    const list = rest.slice(1)
+    const fields = rest ? XEUtils.keys(rest[0]) : []
+    const list = rest
     const status = checkImportData(tableFields, fields)
     if (status) {
       const records: any[] = list.map(item => {
