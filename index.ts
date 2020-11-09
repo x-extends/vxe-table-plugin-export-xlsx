@@ -1,22 +1,33 @@
 /* eslint-disable no-unused-vars */
 import XEUtils from 'xe-utils/ctor'
 import {
-  VXETable,
-  Table,
-  InterceptorExportParams,
-  InterceptorImportParams,
-  ColumnConfig,
-  ExportOptons
+  VXETableByVueProperty,
+  VXETableInstance,
+  VxeTableConstructor,
+  VxeTablePropTypes,
+  VxeTableDefines,
+  VxeGlobalInterceptorHandles
 } from 'vxe-table/lib/vxe-table'
 import XLSX from 'xlsx'
+
+declare module 'vxe-table/lib/vxe-table' {
+  namespace VxeTableDefines {
+    interface ColumnInfo {
+      _row: any;
+      _colSpan: number;
+      _rowSpan: number;
+      childNodes: VxeTableDefines.ColumnInfo[];
+    }
+  }
+}
 /* eslint-enable no-unused-vars */
 
-function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
-  const cellValue = rows[$table.$getColumnIndex(column)]
+function getFooterCellValue ($table: VxeTableConstructor, opts: VxeTablePropTypes.ExportConfig, rows: any[], column: VxeTableDefines.ColumnInfo) {
+  const cellValue = rows[$table.getVTColumnIndex(column)]
   return cellValue
 }
 
-function getFooterData (opts: ExportOptons, footerData: any[][]) {
+function getFooterData (opts: VxeTablePropTypes.ExportConfig, footerData: any[][]) {
   const { footerFilterMethod } = opts
   return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
@@ -28,7 +39,7 @@ function toBuffer (wbout: any) {
   return buf
 }
 
-function getCellLabel (column: ColumnConfig, cellValue: any) {
+function getCellLabel (column: VxeTableDefines.ColumnInfo, cellValue: any) {
   if (cellValue) {
     switch (column.cellType) {
       case 'string':
@@ -48,16 +59,7 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
   return cellValue
 }
 
-declare module 'vxe-table/lib/vxe-table' {
-  interface ColumnInfo {
-    _row: any;
-    _colSpan: number;
-    _rowSpan: number;
-    childNodes: ColumnConfig[];
-  }
-}
-
-function getValidColumn (column: ColumnConfig): ColumnConfig {
+function getValidColumn (column: VxeTableDefines.ColumnInfo): VxeTableDefines.ColumnInfo {
   const { childNodes } = column
   const isColGroup = childNodes && childNodes.length
   if (isColGroup) {
@@ -66,11 +68,11 @@ function getValidColumn (column: ColumnConfig): ColumnConfig {
   return column
 }
 
-function exportXLSX (params: InterceptorExportParams) {
+function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams) {
   const msgKey = 'xlsx'
   const { $table, options, columns, colgroups, datas } = params
-  const { $vxe } = $table
-  const { modal, t } = $vxe
+  const { instance } = $table
+  const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
   const { message, sheetName, isHeader, isFooter, isMerge, isColgroup, original } = options
   const showMsg = message !== false
   const mergeCells = $table.getMergeCells()
@@ -89,7 +91,7 @@ function exportXLSX (params: InterceptorExportParams) {
     })
     if (isColgroup && !original && colgroups) {
       colgroups.forEach((cols, rIndex) => {
-        let groupHead: any = {}
+        const groupHead: any = {}
         columns.forEach((column) => {
           groupHead[column.id] = null
         })
@@ -114,9 +116,9 @@ function exportXLSX (params: InterceptorExportParams) {
   // 处理合并
   if (isMerge && !original) {
     mergeCells.forEach(mergeItem => {
-      let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
+      const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       for (let rIndex = 0; rIndex < datas.length; rIndex++) {
-        let rowIndex = $table._getRowIndex(datas[rIndex]._row)
+        let rowIndex = $table.getVTRowIndex(datas[rIndex]._row)
         if (rowIndex === mergeRowIndex) {
           if (isHeader && colgroups) {
             rowIndex = rIndex + colgroups.length
@@ -174,10 +176,10 @@ function exportXLSX (params: InterceptorExportParams) {
   }
 }
 
-function downloadFile (params: InterceptorExportParams, blob: Blob, options: ExportOptons) {
+function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportParams, blob: Blob, options: VxeTablePropTypes.ExportConfig) {
   const { $table } = params
-  const { $vxe } = $table
-  const { modal, t } = $vxe
+  const { instance } = $table
+  const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
   const { message, filename, type } = options
   const showMsg = message !== false
   if (window.Blob) {
@@ -203,17 +205,11 @@ function checkImportData (tableFields: string[], fields: string[]) {
   return fields.some(field => tableFields.indexOf(field) > -1)
 }
 
-declare module 'vxe-table/lib/vxe-table' {
-  interface Table {
-    _importResolve?: Function | null;
-    _importReject?: Function | null;
-  }
-}
-
-function importXLSX (params: InterceptorImportParams) {
+function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
   const { $table, columns, options, file } = params
-  const { $vxe, _importResolve, _importReject } = $table
-  const { modal, t } = $vxe
+  const { instance, internalData } = $table
+  const { _importResolve, _importReject } = internalData
+  const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
   const showMsg = options.message !== false
   const fileReader = new FileReader()
   fileReader.onload = (e: any) => {
@@ -266,14 +262,14 @@ function importXLSX (params: InterceptorImportParams) {
   fileReader.readAsBinaryString(file)
 }
 
-function handleImportEvent (params: InterceptorImportParams) {
+function handleImportEvent (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
   if (params.options.type === 'xlsx') {
     importXLSX(params)
     return false
   }
 }
 
-function handleExportEvent (params: InterceptorExportParams) {
+function handleExportEvent (params: VxeGlobalInterceptorHandles.InterceptorExportParams) {
   if (params.options.type === 'xlsx') {
     exportXLSX(params)
     return false
@@ -284,7 +280,7 @@ function handleExportEvent (params: InterceptorExportParams) {
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
-  install (vxetable: typeof VXETable) {
+  install (vxetable: VXETableInstance) {
     const { interceptor } = vxetable
     vxetable.setup({
       export: {

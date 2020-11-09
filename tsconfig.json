@@ -8,10 +8,11 @@
     "strict": true,
     "moduleResolution": "node",
     "noImplicitAny": true,
-    "target": "es6",
+    "target": "esnext",
     "lib": [
+      "esnext",
       "dom",
-      "es6"
+      "dom.iterable"
     ]
   }
 }
