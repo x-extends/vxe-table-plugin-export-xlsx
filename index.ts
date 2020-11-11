@@ -212,50 +212,57 @@ function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams
   const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
   const showMsg = options.message !== false
   const fileReader = new FileReader()
-  fileReader.onload = (e: any) => {
-    const tableFields: string[] = []
-    columns.forEach((column) => {
-      const field = column.property
-      if (field) {
-        tableFields.push(field)
-      }
-    })
-    const workbook = XLSX.read(e.target.result, { type: 'binary' })
-    const rest = XLSX.utils.sheet_to_json(XEUtils.first(workbook.Sheets))
-    const fields = rest ? XEUtils.keys(rest[0]) : []
-    const list = rest
-    const status = checkImportData(tableFields, fields)
-    if (status) {
-      const records: any[] = list.map(item => {
-        const record: any = {}
-        tableFields.forEach(field => {
-          record[field] = XEUtils.isUndefined(item[field]) ? null : item[field]
-        })
-        return record
+  fileReader.onload = (e) => {
+    const fr = e.target
+    if (fr) {
+      const tableFields: string[] = []
+      columns.forEach((column) => {
+        const field = column.property
+        if (field) {
+          tableFields.push(field)
+        }
       })
-      $table.createData(records)
-        .then((data: any[]) => {
-          let loadRest: Promise<any>
-          if (options.mode === 'insert') {
-            loadRest = $table.insertAt(data, -1)
-          } else {
-            loadRest = $table.reloadData(data)
-          }
-          return loadRest.then(() => {
-            if (_importResolve) {
-              _importResolve({ status: true })
-            }
+      const workbook = XLSX.read(fr.result, { type: 'binary' })
+      const rest = XLSX.utils.sheet_to_json(XEUtils.first(workbook.Sheets))
+      const fields = rest ? XEUtils.keys(rest[0]) : []
+      const list = rest
+      const status = checkImportData(tableFields, fields)
+      if (status) {
+        const records: any[] = list.map(item => {
+          const record: any = {}
+          tableFields.forEach(field => {
+            record[field] = XEUtils.isUndefined(item[field]) ? null : item[field]
           })
+          return record
         })
-      if (showMsg) {
-        modal.message({ message: t('vxe.table.impSuccess', [records.length]), status: 'success' })
+        $table.createData(records)
+          .then((data: any[]) => {
+            let loadRest: Promise<any>
+            if (options.mode === 'insert') {
+              loadRest = $table.insertAt(data, -1)
+            } else {
+              loadRest = $table.reloadData(data)
+            }
+            return loadRest.then(() => {
+              if (_importResolve) {
+                _importResolve({ status: true })
+              }
+            })
+          })
+        if (showMsg) {
+          modal.message({ message: t('vxe.table.impSuccess', [records.length]), status: 'success' })
+        }
+      } else {
+        if (showMsg) {
+          modal.message({ message: t('vxe.error.impFields'), status: 'error' })
+        }
+        if (_importReject) {
+          _importReject({ status: false })
+        }
       }
     } else {
       if (showMsg) {
         modal.message({ message: t('vxe.error.impFields'), status: 'error' })
-      }
-      if (_importReject) {
-        _importReject({ status: false })
       }
     }
   }
