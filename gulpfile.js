@@ -7,19 +7,14 @@ const replace = require('gulp-replace')
 const sourcemaps = require('gulp-sourcemaps')
 const ts = require('gulp-typescript')
 const pack = require('./package.json')
+const tsconfig = require('./tsconfig.json')
 
 const exportModuleName = 'VXETablePluginExportXLSX'
 
 gulp.task('build_commonjs', function () {
   return gulp.src(['index.d.ts', 'depend.ts', 'index.ts'])
     .pipe(sourcemaps.init())
-    .pipe(ts({
-      strict: true,
-      moduleResolution: 'node',
-      noImplicitAny: true,
-      target: 'es6',
-      lib: ['dom', 'es6']
-    }))
+    .pipe(ts(tsconfig.compilerOptions))
     .pipe(babel({
       presets: ['@babel/env']
     }))
@@ -33,13 +28,7 @@ gulp.task('build_commonjs', function () {
 
 gulp.task('build_umd', function () {
   return gulp.src(['index.d.ts', 'depend.ts', 'index.ts'])
-    .pipe(ts({
-      strict: true,
-      moduleResolution: 'node',
-      noImplicitAny: true,
-      target: 'es6',
-      lib: ['dom', 'es6']
-    }))
+    .pipe(ts(tsconfig.compilerOptions))
     .pipe(replace(`import XEUtils from 'xe-utils/ctor';`, `import XEUtils from 'xe-utils';`))
     .pipe(babel({
       moduleId: pack.name,

@@ -6,17 +6,17 @@ import {
   InterceptorExportParams,
   InterceptorImportParams,
   ColumnConfig,
-  ExportOptons
+  TableExportConfig
 } from 'vxe-table/lib/vxe-table'
 import XLSX from 'xlsx'
 /* eslint-enable no-unused-vars */
 
-function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
+function getFooterCellValue ($table: Table, opts: TableExportConfig, rows: any[], column: ColumnConfig) {
   const cellValue = rows[$table.$getColumnIndex(column)]
   return cellValue
 }
 
-function getFooterData (opts: ExportOptons, footerData: any[][]) {
+function getFooterData (opts: TableExportConfig, footerData: any[][]) {
   const { footerFilterMethod } = opts
   return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
@@ -174,7 +174,7 @@ function exportXLSX (params: InterceptorExportParams) {
   }
 }
 
-function downloadFile (params: InterceptorExportParams, blob: Blob, options: ExportOptons) {
+function downloadFile (params: InterceptorExportParams, blob: Blob, options: TableExportConfig) {
   const { $table } = params
   const { $vxe } = $table
   const { modal, t } = $vxe
