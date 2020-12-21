@@ -84,7 +84,7 @@ function exportXLSX (params: InterceptorExportParams) {
     columns.forEach((column) => {
       colHead[column.id] = original ? column.property : column.getTitle()
       sheetCols.push({
-        wpx: XEUtils.toInteger(column.renderWidth * 0.8)
+        wpx: XEUtils.toInteger(column.renderWidth * 0.75)
       })
     })
     if (isColgroup && !original && colgroups) {
