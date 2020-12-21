@@ -116,7 +116,7 @@ function exportXLSX (params: InterceptorExportParams) {
     mergeCells.forEach(mergeItem => {
       let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       for (let rIndex = 0; rIndex < datas.length; rIndex++) {
-        let rowIndex = $table._getRowIndex(datas[rIndex]._row)
+        let rowIndex = $table.getVTRowIndex(datas[rIndex]._row)
         if (rowIndex === mergeRowIndex) {
           if (isHeader && colgroups) {
             rowIndex = rIndex + colgroups.length
