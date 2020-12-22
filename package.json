@@ -1,6 +1,6 @@
 {
   "name": "vxe-table-plugin-export-xlsx",
-  "version": "2.0.9",
+  "version": "2.1.0-beta.1",
   "description": "基于 vxe-table 的表格插件，支持导出 xlsx 格式",
   "scripts": {
     "lib": "gulp build"
@@ -33,6 +33,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.2",
     "eslint-plugin-typescript": "^0.14.0",
+    "exceljs": "^4.2.0",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^7.0.1",
     "gulp-babel": "^8.0.0",
@@ -49,11 +50,10 @@
     "typescript": "^4.0.5",
     "vue": "^2.6.12",
     "vxe-table": "^2.10.0",
-    "xe-utils": "^3.0.4",
-    "xlsx": "^0.16.7"
+    "xe-utils": "^3.0.4"
   },
   "peerDependencies": {
-    "vxe-table": ">= 2.9"
+    "vxe-table": ">= 2.10"
   },
   "repository": {
     "type": "git",
