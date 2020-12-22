@@ -40,7 +40,7 @@ gulp.task('build_umd', function () {
           globals: {
             [pack.name]: exportModuleName,
             'xe-utils': 'XEUtils',
-            'xlsx': 'XLSX'
+            'exceljs': 'ExcelJS'
           },
           exactGlobals: true
         }]

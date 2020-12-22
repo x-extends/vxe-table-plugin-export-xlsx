@@ -27,13 +27,6 @@ function getFooterData (opts: TableExportConfig, footerData: any[][]) {
   return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
 
-function toBuffer (wbout: any) {
-  const buf = new ArrayBuffer(wbout.length)
-  const view = new Uint8Array(buf)
-  for (let index = 0; index !== wbout.length; ++index) view[index] = wbout.charCodeAt(index) & 0xFF
-  return buf
-}
-
 function getCellLabel (column: ColumnConfig, cellValue: any) {
   if (cellValue) {
     switch (column.cellType) {
@@ -283,7 +276,7 @@ function exportXLSX (params: InterceptorExportParams) {
       })
     }
     if (useStyle && sheetMethod) {
-      sheetMethod({ options, workbook, worksheet: sheet })
+      sheetMethod({ options, workbook, worksheet: sheet, columns, colgroups, datas, $table })
     }
     sheetMerges.forEach(({ s, e }) => {
       sheet.mergeCells(s.r + 1, s.c + 1, e.r + 1, e.c + 1)
