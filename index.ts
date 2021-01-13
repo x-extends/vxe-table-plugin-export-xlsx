@@ -67,7 +67,7 @@ function getValidColumn (column: ColumnConfig): ColumnConfig {
 
 function setExcelRowHeight (excelRow: ExcelJS.Row, height: number) {
   if (height) {
-    excelRow.height = XEUtils.floor(height * 0.8, 1)
+    excelRow.height = XEUtils.floor(height * 0.75, 12)
   }
 }
 
