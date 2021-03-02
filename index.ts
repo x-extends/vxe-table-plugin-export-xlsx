@@ -17,21 +17,11 @@ const defaultCellFontColor = '606266'
 const defaultCellBorderStyle = 'thin'
 const defaultCellBorderColor = 'e8eaec'
 
-function getFooterCellValue ($table: Table, opts: TableExportConfig, rows: any[], column: ColumnConfig) {
-  const cellValue = rows[$table.getVMColumnIndex(column)]
-  return cellValue
-}
-
-function getFooterData (opts: TableExportConfig, footerData: any[][]) {
-  const { footerFilterMethod } = opts
-  return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
-}
-
 function getCellLabel (column: ColumnConfig, cellValue: any) {
   if (cellValue) {
     switch (column.cellType) {
       case 'string':
-        break
+        return XEUtils.toString(cellValue)
       case 'number':
         if (!isNaN(cellValue)) {
           return Number(cellValue)
@@ -44,6 +34,16 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
         break
     }
   }
+  return cellValue
+}
+
+function getFooterData (opts: TableExportConfig, footerData: any[][]) {
+  const { footerFilterMethod } = opts
+  return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
+}
+
+function getFooterCellValue ($table: Table, opts: TableExportConfig, rows: any[], column: ColumnConfig) {
+  const cellValue = getCellLabel(column, rows[$table.getVMColumnIndex(column)])
   return cellValue
 }
 
@@ -122,17 +122,19 @@ function exportXLSX (params: InterceptorExportParams) {
   const footList: any[] = []
   const sheetCols: any[] = []
   const sheetMerges: { s: { r: number, c: number }, e: { r: number, c: number } }[] = []
+  let beforeRowCount = 0
+  const colHead: any = {}
+  columns.forEach((column) => {
+    const { id, property, renderWidth } = column
+    colHead[id] = original ? property : column.getTitle()
+    sheetCols.push({
+      key: id,
+      width: XEUtils.ceil(renderWidth / 8, 1)
+    })
+  })
   // 处理表头
   if (isHeader) {
-    const colHead: any = {}
-    columns.forEach((column) => {
-      const { id, property, renderWidth } = column
-      colHead[id] = original ? property : column.getTitle()
-      sheetCols.push({
-        key: id,
-        width: XEUtils.ceil(renderWidth / 8, 1)
-      })
-    })
+    // 处理分组
     if (isColgroup && !original && colgroups) {
       colgroups.forEach((cols, rIndex) => {
         let groupHead: any = {}
@@ -156,24 +158,16 @@ function exportXLSX (params: InterceptorExportParams) {
     } else {
       colList.push(colHead)
     }
+    beforeRowCount += colList.length
   }
   // 处理合并
   if (isMerge && !original) {
     mergeCells.forEach(mergeItem => {
       let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
-      for (let rIndex = 0; rIndex < datas.length; rIndex++) {
-        let rowIndex = $table.getVTRowIndex(datas[rIndex]._row)
-        if (rowIndex === mergeRowIndex) {
-          if (isHeader && colgroups) {
-            rowIndex = rIndex + colgroups.length
-          }
-          sheetMerges.push({
-            s: { r: rowIndex, c: mergeColIndex },
-            e: { r: rowIndex + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
-          })
-          break
-        }
-      }
+      sheetMerges.push({
+        s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
+        e: { r: mergeRowIndex + beforeRowCount + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
+      })
     })
   }
   const rowList = datas.map(item => {
@@ -183,10 +177,22 @@ function exportXLSX (params: InterceptorExportParams) {
     })
     return rest
   })
+  beforeRowCount += rowList.length
   // 处理表尾
   if (isFooter) {
     const { footerData } = $table.getTableData()
     const footers = getFooterData(options, footerData)
+    const mergeFooterItems = $table.getMergeFooterItems()
+    // 处理合并
+    if (isMerge && !original) {
+      mergeFooterItems.forEach(mergeItem => {
+        let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
+        sheetMerges.push({
+          s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
+          e: { r: mergeRowIndex + beforeRowCount + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
+        })
+      })
+    }
     footers.forEach((rows) => {
       const item: any = {}
       columns.forEach((column) => {
