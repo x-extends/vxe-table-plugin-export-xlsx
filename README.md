@@ -1,6 +1,6 @@
 # vxe-table-plugin-export-xlsx
 
-[![gitee star](https://gitee.com/xuliangzhan_admin/vxe-table-plugin-export-xlsx/badge/star.svg?theme=dark)](https://gitee.com/xuliangzhan_admin/vxe-table-plugin-export-xlsx/stargazers)
+[![gitee star](https://gitee.com/x-extends/vxe-table-plugin-export-xlsx/badge/star.svg?theme=dark)](https://gitee.com/x-extends/vxe-table-plugin-export-xlsx/stargazers)
 [![npm version](https://img.shields.io/npm/v/vxe-table-plugin-export-xlsx.svg?style=flat-square)](https://www.npmjs.com/package/vxe-table-plugin-export-xlsx)
 [![npm downloads](https://img.shields.io/npm/dm/vxe-table-plugin-export-xlsx.svg?style=flat-square)](http://npm-stat.com/charts.html?package=vxe-table-plugin-export-xlsx)
 [![npm license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
@@ -15,6 +15,7 @@ npm install xe-utils vxe-table vxe-table-plugin-export-xlsx exceljs
 
 ```javascript
 // ...
+import VXETable from 'vxe-table'
 import VXETablePluginExportXLSX from 'vxe-table-plugin-export-xlsx'
 // ...
 

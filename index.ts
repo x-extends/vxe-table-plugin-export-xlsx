@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import XEUtils from 'xe-utils/ctor'
 import {
   VXETableByVueProperty,
@@ -24,7 +23,6 @@ declare module 'vxe-table/lib/vxe-table' {
     }
   }
 }
-/* eslint-enable no-unused-vars */
 
 const defaultHeaderBackgroundColor = 'f8f8f9'
 const defaultCellFontColor = '606266'
