@@ -29,7 +29,8 @@ gulp.task('build_commonjs', function () {
 gulp.task('build_umd', function () {
   return gulp.src(['depend.ts', 'index.ts'])
     .pipe(ts(tsconfig.compilerOptions))
-    .pipe(replace(`import XEUtils from 'xe-utils/ctor';`, `import XEUtils from 'xe-utils';`))
+    .pipe(replace(`from 'xe-utils/ctor';`, `from 'xe-utils';`))
+    .pipe(replace(`from 'vxe-table/lib/vxe-table';`, `from 'vxe-table';`))
     .pipe(babel({
       moduleId: pack.name,
       presets: [
@@ -39,6 +40,7 @@ gulp.task('build_umd', function () {
         ['@babel/transform-modules-umd', {
           globals: {
             [pack.name]: exportModuleName,
+            'vxe-table': 'VXETable',
             'xe-utils': 'XEUtils',
             'exceljs': 'ExcelJS'
           },
@@ -46,7 +48,6 @@ gulp.task('build_umd', function () {
         }]
       ]
     }))
-    .pipe(replace(`global.${exportModuleName} = mod.exports;`, `global.${exportModuleName} = mod.exports.default;`))
     .pipe(rename({
       basename: 'index',
       suffix: '.umd',

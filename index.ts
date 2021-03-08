@@ -1,13 +1,14 @@
 import XEUtils from 'xe-utils/ctor'
 import {
-  VXETableByVueProperty,
-  VXETableInstance,
+  VXETableCore,
   VxeTableConstructor,
   VxeTablePropTypes,
   VxeTableDefines,
   VxeGlobalInterceptorHandles
 } from 'vxe-table/lib/vxe-table'
-import * as ExcelJS from 'exceljs'
+import ExcelJS from 'exceljs'
+
+let vxetable:VXETableCore
 
 declare module 'vxe-table/lib/vxe-table' {
   namespace VxeTableDefines {
@@ -33,7 +34,7 @@ function getCellLabel (column: VxeTableDefines.ColumnInfo, cellValue: any) {
   if (cellValue) {
     switch (column.cellType) {
       case 'string':
-        return XEUtils.toString(cellValue)
+        return XEUtils.toValueString(cellValue)
       case 'number':
         if (!isNaN(cellValue)) {
           return Number(cellValue)
@@ -116,10 +117,9 @@ function getDefaultBorderStyle () {
 function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams) {
   const msgKey = 'xlsx'
   const { $table, options, columns, colgroups, datas } = params
-  const { props, instance, reactData } = $table
+  const { props, reactData } = $table
   const { headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign } = props
   const { rowHeight } = reactData
-  const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
   const { message, sheetName, isHeader, isFooter, isMerge, isColgroup, original, useStyle, sheetMethod } = options
   const showMsg = message !== false
   const mergeCells = $table.getMergeCells()
@@ -297,13 +297,13 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
       // 导出 xlsx
       downloadFile(params, blob, options)
       if (showMsg) {
-        modal.close(msgKey)
-        modal.message({ message: t('vxe.table.expSuccess'), status: 'success' })
+        vxetable.modal.close(msgKey)
+        vxetable.modal.message({ message: vxetable.t('vxe.table.expSuccess'), status: 'success' })
       }
     })
   }
   if (showMsg) {
-    modal.message({ id: msgKey, message: t('vxe.table.expLoading'), status: 'loading', duration: -1 })
+    vxetable.modal.message({ id: msgKey, message: vxetable.t('vxe.table.expLoading'), status: 'loading', duration: -1 })
     setTimeout(exportMethod, 1500)
   } else {
     exportMethod()
@@ -311,9 +311,6 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
 }
 
 function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportParams, blob: Blob, options: VxeTablePropTypes.ExportConfig) {
-  const { $table } = params
-  const { instance } = $table
-  const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
   const { message, filename, type } = options
   const showMsg = message !== false
   if (window.Blob) {
@@ -330,7 +327,7 @@ function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportPara
     }
   } else {
     if (showMsg) {
-      modal.alert({ message: t('vxe.error.notExp'), status: 'error' })
+      vxetable.modal.alert({ message: vxetable.t('vxe.error.notExp'), status: 'error' })
     }
   }
 }
@@ -341,12 +338,11 @@ function checkImportData (tableFields: string[], fields: string[]) {
 
 function importError (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
   const { $table, options } = params
-  const { instance, internalData } = $table
+  const { internalData } = $table
   const { _importReject } = internalData
-  const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
   const showMsg = options.message !== false
   if (showMsg) {
-    modal.message({ message: t('vxe.error.impFields'), status: 'error' })
+    vxetable.modal.message({ message: vxetable.t('vxe.error.impFields'), status: 'error' })
   }
   if (_importReject) {
     _importReject({ status: false })
@@ -355,9 +351,8 @@ function importError (params: VxeGlobalInterceptorHandles.InterceptorImportParam
 
 function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
   const { $table, columns, options, file } = params
-  const { instance, internalData } = $table
+  const { internalData } = $table
   const { _importResolve } = internalData
-  const { modal, t } = instance.appContext.config.globalProperties.$vxe as VXETableByVueProperty
     const showMsg = options.message !== false
   const fileReader = new FileReader()
   fileReader.onerror = () => {
@@ -408,7 +403,7 @@ function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams
                 })
               })
             if (showMsg) {
-              modal.message({ message: t('vxe.table.impSuccess', [records.length]), status: 'success' })
+              vxetable.modal.message({ message: vxetable.t('vxe.table.impSuccess', [records.length]), status: 'success' })
             }
           } else {
             importError(params)
@@ -442,9 +437,12 @@ function handleExportEvent (params: VxeGlobalInterceptorHandles.InterceptorExpor
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
-  install (vxetable: VXETableInstance) {
-    const { interceptor } = vxetable
-    vxetable.setup({
+  install (vxetablecore: VXETableCore) {
+    const { setup, interceptor } = vxetablecore
+
+    vxetable = vxetablecore
+
+    setup({
       export: {
         types: {
           xlsx: 0
