@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import XEUtils from 'xe-utils/ctor'
+import XEUtils from 'xe-utils'
 import {
   VXETable,
   Table,
@@ -10,7 +9,6 @@ import {
   ColumnAlign
 } from 'vxe-table/lib/vxe-table'
 import * as ExcelJS from 'exceljs'
-/* eslint-enable no-unused-vars */
 
 const defaultHeaderBackgroundColor = 'f8f8f9'
 const defaultCellFontColor = '606266'
