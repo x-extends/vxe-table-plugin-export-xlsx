@@ -12,7 +12,7 @@ const tsconfig = require('./tsconfig.json')
 const exportModuleName = 'VXETablePluginExportXLSX'
 
 gulp.task('build_commonjs', function () {
-  return gulp.src(['depend.ts', 'index.ts'])
+  return gulp.src(['index.ts'])
     .pipe(sourcemaps.init())
     .pipe(ts(tsconfig.compilerOptions))
     .pipe(babel({
@@ -27,7 +27,7 @@ gulp.task('build_commonjs', function () {
 })
 
 gulp.task('build_umd', function () {
-  return gulp.src(['depend.ts', 'index.ts'])
+  return gulp.src(['index.ts'])
     .pipe(ts(tsconfig.compilerOptions))
     .pipe(replace(`from 'xe-utils/ctor';`, `from 'xe-utils';`))
     .pipe(replace(`from 'vxe-table/lib/vxe-table';`, `from 'vxe-table';`))
