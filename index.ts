@@ -1,16 +1,10 @@
 import XEUtils from 'xe-utils'
-import {
-  VXETableCore,
-  VxeTableConstructor,
-  VxeTablePropTypes,
-  VxeTableDefines,
-  VxeGlobalInterceptorHandles
-} from 'vxe-table/lib/vxe-table'
+import { VXETableCore, VxeTableConstructor, VxeTablePropTypes, VxeTableDefines, VxeGlobalInterceptorHandles } from 'vxe-table'
 import ExcelJS from 'exceljs'
 
 let vxetable:VXETableCore
 
-declare module 'vxe-table/lib/vxe-table' {
+declare module 'vxe-table' {
   namespace VxeTableDefines {
     interface ExtortSheetMethodParams {
       workbook: ExcelJS.Workbook;
