@@ -450,7 +450,7 @@ export const VXETablePluginExportXLSX = {
   }
 }
 
-if (typeof window !== 'undefined' && window.VXETable) {
+if (typeof window !== 'undefined' && window.VXETable && window.VXETable.use) {
   window.VXETable.use(VXETablePluginExportXLSX)
 }
 

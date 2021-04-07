@@ -35,10 +35,10 @@ VXETable.use(VXETablePluginExportXLSX)
   ref="xTable"
   height="600"
   :data="tableData">
-  <vxe-table-column type="index" width="60"></vxe-table-column>
-  <vxe-table-column field="name" title="Name"></vxe-table-column>
-  <vxe-table-column field="age" title="Age"></vxe-table-column>
-  <vxe-table-column field="date" title="Date"></vxe-table-column>
+  <vxe-column type="seq" width="60"></vxe-column>
+  <vxe-column field="name" title="Name"></vxe-column>
+  <vxe-column field="age" title="Age"></vxe-column>
+  <vxe-column field="date" title="Date"></vxe-column>
 </vxe-table>
 ```
 
@@ -47,12 +47,9 @@ export default {
   data () {
     return {
       tableData: [
-        {
-          id: 100,
-          name: 'test',
-          age: 26,
-          date: null
-        }
+        { id: 100, name: 'test', age: 26, date: null },
+        { id: 101, name: 'test1', age: 30, date: null },
+        { id: 102, name: 'test2', age: 34, date: null }
       ]
     }
   },
