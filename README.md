@@ -35,10 +35,10 @@ VXETable.use(VXETablePluginExportXLSX)
   ref="xTable"
   height="600"
   :data="tableData">
-  <vxe-table-column type="seq" width="60"></vxe-table-column>
-  <vxe-table-column field="name" title="Name"></vxe-table-column>
-  <vxe-table-column field="age" title="Age"></vxe-table-column>
-  <vxe-table-column field="date" title="Date"></vxe-table-column>
+  <vxe-column type="seq" width="60"></vxe-column>
+  <vxe-column field="name" title="Name"></vxe-column>
+  <vxe-column field="age" title="Age"></vxe-column>
+  <vxe-column field="date" title="Date"></vxe-column>
 </vxe-table>
 ```
 
