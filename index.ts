@@ -110,6 +110,7 @@ function getDefaultBorderStyle () {
 
 function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams) {
   const msgKey = 'xlsx'
+  const { modal, t} = vxetable
   const { $table, options, columns, colgroups, datas } = params
   const { props, reactData } = $table
   const { headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign } = props
@@ -290,14 +291,14 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
       var blob = new Blob([buffer], { type: 'application/octet-stream' })
       // 导出 xlsx
       downloadFile(params, blob, options)
-      if (showMsg) {
-        vxetable.modal.close(msgKey)
-        vxetable.modal.message({ message: vxetable.t('vxe.table.expSuccess'), status: 'success' })
+      if (showMsg && modal) {
+        modal.close(msgKey)
+        modal.message({ content: t('vxe.table.expSuccess'), status: 'success' })
       }
     })
   }
-  if (showMsg) {
-    vxetable.modal.message({ id: msgKey, message: vxetable.t('vxe.table.expLoading'), status: 'loading', duration: -1 })
+  if (showMsg && modal) {
+    modal.message({ id: msgKey, content: t('vxe.table.expLoading'), status: 'loading', duration: -1 })
     setTimeout(exportMethod, 1500)
   } else {
     exportMethod()
@@ -305,6 +306,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
 }
 
 function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportParams, blob: Blob, options: VxeTablePropTypes.ExportConfig) {
+  const { modal, t } = vxetable
   const { message, filename, type } = options
   const showMsg = message !== false
   if (window.Blob) {
@@ -320,8 +322,8 @@ function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportPara
       document.body.removeChild(linkElem)
     }
   } else {
-    if (showMsg) {
-      vxetable.modal.alert({ message: vxetable.t('vxe.error.notExp'), status: 'error' })
+    if (showMsg && modal) {
+      modal.alert({ content: t('vxe.error.notExp'), status: 'error' })
     }
   }
 }
@@ -331,12 +333,13 @@ function checkImportData (tableFields: string[], fields: string[]) {
 }
 
 function importError (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
+  const { modal, t } = vxetable
   const { $table, options } = params
   const { internalData } = $table
   const { _importReject } = internalData
   const showMsg = options.message !== false
-  if (showMsg) {
-    vxetable.modal.message({ message: vxetable.t('vxe.error.impFields'), status: 'error' })
+  if (showMsg && modal) {
+    modal.message({ content: t('vxe.error.impFields'), status: 'error' })
   }
   if (_importReject) {
     _importReject({ status: false })
@@ -344,6 +347,7 @@ function importError (params: VxeGlobalInterceptorHandles.InterceptorImportParam
 }
 
 function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
+  const { modal, t } = vxetable
   const { $table, columns, options, file } = params
   const { internalData } = $table
   const { _importResolve } = internalData
@@ -396,8 +400,8 @@ function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams
                   }
                 })
               })
-            if (showMsg) {
-              vxetable.modal.message({ message: vxetable.t('vxe.table.impSuccess', [records.length]), status: 'success' })
+            if (showMsg && modal) {
+              modal.message({ content: t('vxe.table.impSuccess', [records.length]), status: 'success' })
             }
           } else {
             importError(params)
