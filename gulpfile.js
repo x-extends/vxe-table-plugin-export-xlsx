@@ -38,6 +38,7 @@ gulp.task('build_umd', function () {
         ['@babel/transform-modules-umd', {
           globals: {
             [pack.name]: exportModuleName,
+            'vue': 'Vue',
             'vxe-table': 'VXETable',
             'xe-utils': 'XEUtils',
             'exceljs': 'ExcelJS'

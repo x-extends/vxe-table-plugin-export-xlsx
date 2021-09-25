@@ -110,7 +110,7 @@ function getDefaultBorderStyle () {
 
 function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams) {
   const msgKey = 'xlsx'
-  const { modal, t} = vxetable
+  const { modal, t } = vxetable
   const { $table, options, columns, colgroups, datas } = params
   const { props, reactData } = $table
   const { headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign } = props
@@ -137,7 +137,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     // 处理分组
     if (isColgroup && !original && colgroups) {
       colgroups.forEach((cols, rIndex) => {
-        let groupHead: any = {}
+        const groupHead: any = {}
         columns.forEach((column) => {
           groupHead[column.id] = null
         })
@@ -163,7 +163,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   // 处理合并
   if (isMerge && !original) {
     mergeCells.forEach(mergeItem => {
-      let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
+      const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       sheetMerges.push({
         s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
         e: { r: mergeRowIndex + beforeRowCount + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
@@ -186,7 +186,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     // 处理合并
     if (isMerge && !original) {
       mergeFooterItems.forEach(mergeItem => {
-        let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
+        const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
         sheetMerges.push({
           s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
           e: { r: mergeRowIndex + beforeRowCount + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
@@ -226,7 +226,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
               },
               fill: {
                 type: 'pattern',
-                pattern:'solid',
+                pattern: 'solid',
                 fgColor: {
                   argb: defaultHeaderBackgroundColor
                 }
@@ -287,8 +287,8 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     sheetMerges.forEach(({ s, e }) => {
       sheet.mergeCells(s.r + 1, s.c + 1, e.r + 1, e.c + 1)
     })
-    workbook.xlsx.writeBuffer().then(buffer  => {
-      var blob = new Blob([buffer], { type: 'application/octet-stream' })
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' })
       // 导出 xlsx
       downloadFile(params, blob, options)
       if (showMsg && modal) {
@@ -310,8 +310,8 @@ function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportPara
   const { message, filename, type } = options
   const showMsg = message !== false
   if (window.Blob) {
-    if (navigator.msSaveBlob) {
-      navigator.msSaveBlob(blob, `${filename}.${type}`)
+    if ((navigator as any).msSaveBlob) {
+      (navigator as any).msSaveBlob(blob, `${filename}.${type}`)
     } else {
       const linkElem = document.createElement('a')
       linkElem.target = '_blank'
@@ -351,7 +351,7 @@ function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams
   const { $table, columns, options, file } = params
   const { internalData } = $table
   const { _importResolve } = internalData
-    const showMsg = options.message !== false
+  const showMsg = options.message !== false
   const fileReader = new FileReader()
   fileReader.onerror = () => {
     importError(params)
@@ -376,7 +376,7 @@ function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams
           const status = checkImportData(tableFields, fields)
           if (status) {
             const records = sheetValues.slice(fieldIndex).map(list => {
-              const item : any= {}
+              const item : any = {}
               list.forEach((cellValue, cIndex) => {
                 item[fields[cIndex]] = cellValue
               })
