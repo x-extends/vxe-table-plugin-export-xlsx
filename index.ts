@@ -7,7 +7,7 @@ import {
   ColumnConfig,
   TableExportConfig,
   ColumnAlign
-} from 'vxe-table/lib/vxe-table'
+} from 'vxe-table'
 import * as ExcelJS from 'exceljs'
 
 const defaultHeaderBackgroundColor = 'f8f8f9'
@@ -19,7 +19,7 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
   if (cellValue) {
     switch (column.cellType) {
       case 'string':
-        return XEUtils.toString(cellValue)
+        return XEUtils.toValueString(cellValue)
       case 'number':
         if (!isNaN(cellValue)) {
           return Number(cellValue)
@@ -45,7 +45,7 @@ function getFooterCellValue ($table: Table, opts: TableExportConfig, rows: any[]
   return cellValue
 }
 
-declare module 'vxe-table/lib/vxe-table' {
+declare module 'vxe-table' {
   interface ColumnInfo {
     _row: any;
     _colSpan: number;
@@ -135,7 +135,7 @@ function exportXLSX (params: InterceptorExportParams) {
     // 处理分组
     if (isColgroup && !original && colgroups) {
       colgroups.forEach((cols, rIndex) => {
-        let groupHead: any = {}
+        const groupHead: any = {}
         columns.forEach((column) => {
           groupHead[column.id] = null
         })
@@ -161,7 +161,7 @@ function exportXLSX (params: InterceptorExportParams) {
   // 处理合并
   if (isMerge && !original) {
     mergeCells.forEach(mergeItem => {
-      let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
+      const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       sheetMerges.push({
         s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
         e: { r: mergeRowIndex + beforeRowCount + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
@@ -184,7 +184,7 @@ function exportXLSX (params: InterceptorExportParams) {
     // 处理合并
     if (isMerge && !original) {
       mergeFooterItems.forEach(mergeItem => {
-        let { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
+        const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
         sheetMerges.push({
           s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
           e: { r: mergeRowIndex + beforeRowCount + mergeRowspan - 1, c: mergeColIndex + mergeColspan - 1 }
@@ -224,7 +224,7 @@ function exportXLSX (params: InterceptorExportParams) {
               },
               fill: {
                 type: 'pattern',
-                pattern:'solid',
+                pattern: 'solid',
                 fgColor: {
                   argb: defaultHeaderBackgroundColor
                 }
@@ -280,23 +280,24 @@ function exportXLSX (params: InterceptorExportParams) {
       })
     }
     if (useStyle && sheetMethod) {
-      sheetMethod({ options, workbook, worksheet: sheet, columns, colgroups, datas, $table })
+      const sParams = { options: options as any, workbook, worksheet: sheet, columns, colgroups, datas, $table }
+      sheetMethod(sParams)
     }
     sheetMerges.forEach(({ s, e }) => {
       sheet.mergeCells(s.r + 1, s.c + 1, e.r + 1, e.c + 1)
     })
-    workbook.xlsx.writeBuffer().then(buffer  => {
-      var blob = new Blob([buffer], { type: 'application/octet-stream' })
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' })
       // 导出 xlsx
       downloadFile(params, blob, options)
-      if (showMsg) {
+      if (showMsg && modal) {
         modal.close(msgKey)
-        modal.message({ message: t('vxe.table.expSuccess'), status: 'success' })
+        modal.message({ content: t('vxe.table.expSuccess') as string, status: 'success' })
       }
     })
   }
-  if (showMsg) {
-    modal.message({ id: msgKey, message: t('vxe.table.expLoading'), status: 'loading', duration: -1 })
+  if (showMsg && modal) {
+    modal.message({ id: msgKey, content: t('vxe.table.expLoading') as string, status: 'loading', duration: -1 })
     setTimeout(exportMethod, 1500)
   } else {
     exportMethod()
@@ -310,8 +311,8 @@ function downloadFile (params: InterceptorExportParams, blob: Blob, options: Tab
   const { message, filename, type } = options
   const showMsg = message !== false
   if (window.Blob) {
-    if (navigator.msSaveBlob) {
-      navigator.msSaveBlob(blob, `${filename}.${type}`)
+    if ((navigator as any).msSaveBlob) {
+      (navigator as any).msSaveBlob(blob, `${filename}.${type}`)
     } else {
       const linkElem = document.createElement('a')
       linkElem.target = '_blank'
@@ -322,8 +323,8 @@ function downloadFile (params: InterceptorExportParams, blob: Blob, options: Tab
       document.body.removeChild(linkElem)
     }
   } else {
-    if (showMsg) {
-      modal.alert({ message: t('vxe.error.notExp'), status: 'error' })
+    if (showMsg && modal) {
+      modal.alert({ content: t('vxe.error.notExp') as string, status: 'error' })
     }
   }
 }
@@ -332,7 +333,7 @@ function checkImportData (tableFields: string[], fields: string[]) {
   return fields.some(field => tableFields.indexOf(field) > -1)
 }
 
-declare module 'vxe-table/lib/vxe-table' {
+declare module 'vxe-table' {
   interface Table {
     _importResolve?: Function | null;
     _importReject?: Function | null;
@@ -343,8 +344,8 @@ function importError (params: InterceptorImportParams) {
   const { $vxe, _importReject } = $table
   const showMsg = options.message !== false
   const { modal, t } = $vxe
-  if (showMsg) {
-    modal.message({ message: t('vxe.error.impFields'), status: 'error' })
+  if (showMsg && modal) {
+    modal.message({ content: t('vxe.error.impFields') as string, status: 'error' })
   }
   if (_importReject) {
     _importReject({ status: false })
@@ -380,7 +381,7 @@ function importXLSX (params: InterceptorImportParams) {
           const status = checkImportData(tableFields, fields)
           if (status) {
             const records = sheetValues.slice(fieldIndex).map(list => {
-              const item : any= {}
+              const item : any = {}
               list.forEach((cellValue, cIndex) => {
                 item[fields[cIndex]] = cellValue
               })
@@ -404,8 +405,8 @@ function importXLSX (params: InterceptorImportParams) {
                   }
                 })
               })
-            if (showMsg) {
-              modal.message({ message: t('vxe.table.impSuccess', [records.length]), status: 'success' })
+            if (showMsg && modal) {
+              modal.message({ content: t('vxe.table.impSuccess', [records.length]) as string, status: 'success' })
             }
           } else {
             importError(params)
