@@ -26,6 +26,9 @@ const defaultCellBorderColor = 'e8eaec'
 
 function getCellLabel (column: VxeTableDefines.ColumnInfo, cellValue: any) {
   if (cellValue) {
+    if (column.type === 'seq') {
+      return XEUtils.toValueString(cellValue)
+    }
     switch (column.cellType) {
       case 'string':
         return XEUtils.toValueString(cellValue)
