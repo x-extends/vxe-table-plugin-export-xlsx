@@ -128,8 +128,8 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   let beforeRowCount = 0
   const colHead: any = {}
   columns.forEach((column) => {
-    const { id, property, renderWidth } = column
-    colHead[id] = original ? property : column.getTitle()
+    const { id, field, renderWidth } = column
+    colHead[id] = original ? field : column.getTitle()
     sheetCols.push({
       key: id,
       width: XEUtils.ceil(renderWidth / 8, 1)
@@ -148,7 +148,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
           const { _colSpan, _rowSpan } = column
           const validColumn = getValidColumn(column)
           const columnIndex = columns.indexOf(validColumn)
-          groupHead[validColumn.id] = original ? validColumn.property : column.getTitle()
+          groupHead[validColumn.id] = original ? validColumn.field : column.getTitle()
           if (_colSpan > 1 || _rowSpan > 1) {
             sheetMerges.push({
               s: { r: rIndex, c: columnIndex },
@@ -246,18 +246,20 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
       }
       excelRow.eachCell(excelCell => {
         const excelCol = sheet.getColumn(excelCell.col)
-        const column: any = $table.getColumnById(excelCol.key as string)
-        const { align } = column
-        setExcelCellStyle(excelCell, align || allAlign)
-        if (useStyle) {
-          Object.assign(excelCell, {
-            font: {
-              color: {
-                argb: defaultCellFontColor
-              }
-            },
-            border: getDefaultBorderStyle()
-          })
+        const column = $table.getColumnById(excelCol.key as string)
+        if (column) {
+          const { align } = column
+          setExcelCellStyle(excelCell, align || allAlign)
+          if (useStyle) {
+            Object.assign(excelCell, {
+              font: {
+                color: {
+                  argb: defaultCellFontColor
+                }
+              },
+              border: getDefaultBorderStyle()
+            })
+          }
         }
       })
     })
@@ -268,18 +270,20 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
         }
         excelRow.eachCell(excelCell => {
           const excelCol = sheet.getColumn(excelCell.col)
-          const column: any = $table.getColumnById(excelCol.key as string)
-          const { footerAlign, align } = column
-          setExcelCellStyle(excelCell, footerAlign || align || allFooterAlign || allAlign)
-          if (useStyle) {
-            Object.assign(excelCell, {
-              font: {
-                color: {
-                  argb: defaultCellFontColor
-                }
-              },
-              border: getDefaultBorderStyle()
-            })
+          const column = $table.getColumnById(excelCol.key as string)
+          if (column) {
+            const { footerAlign, align } = column
+            setExcelCellStyle(excelCell, footerAlign || align || allFooterAlign || allAlign)
+            if (useStyle) {
+              Object.assign(excelCell, {
+                font: {
+                  color: {
+                    argb: defaultCellFontColor
+                  }
+                },
+                border: getDefaultBorderStyle()
+              })
+            }
           }
         })
       })
@@ -362,7 +366,7 @@ function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams
   fileReader.onload = (evnt) => {
     const tableFields: string[] = []
     columns.forEach((column) => {
-      const field = column.property
+      const field = column.field
       if (field) {
         tableFields.push(field)
       }
