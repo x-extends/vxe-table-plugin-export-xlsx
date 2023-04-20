@@ -7,6 +7,10 @@
 
 基于 [vxe-table](https://www.npmjs.com/package/vxe-table) 的表格插件，支持导出 xlsx 格式，基于 [exceljs](https://github.com/exceljs/exceljs) 实现
 
+## Compatibility
+
+对应 vxe-table v3 版本  
+
 ## Installing
 
 ```shell

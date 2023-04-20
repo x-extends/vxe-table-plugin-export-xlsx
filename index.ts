@@ -17,6 +17,9 @@ const defaultCellBorderColor = 'e8eaec'
 
 function getCellLabel (column: ColumnConfig, cellValue: any) {
   if (cellValue) {
+    if (column.type === 'seq') {
+      return XEUtils.toValueString(cellValue)
+    }
     switch (column.cellType) {
       case 'string':
         return XEUtils.toValueString(cellValue)
