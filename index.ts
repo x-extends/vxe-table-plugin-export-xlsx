@@ -128,8 +128,8 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   let beforeRowCount = 0
   const colHead: any = {}
   columns.forEach((column) => {
-    const { id, field, renderWidth } = column
-    colHead[id] = original ? field : column.getTitle()
+    const { id, field, renderWidth, headerExportMethod } = column as any
+    colHead[id] = headerExportMethod ? headerExportMethod({ column, $table }) : (original ? field : column.getTitle())
     sheetCols.push({
       key: id,
       width: XEUtils.ceil(renderWidth / 8, 1)
@@ -138,17 +138,17 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   // 处理表头
   if (isHeader) {
     // 处理分组
-    if (isColgroup && !original && colgroups) {
+    if (isColgroup && colgroups) {
       colgroups.forEach((cols, rIndex) => {
         const groupHead: any = {}
         columns.forEach((column) => {
           groupHead[column.id] = null
         })
         cols.forEach((column) => {
-          const { _colSpan, _rowSpan } = column
+          const { _colSpan, _rowSpan, headerExportMethod } = column as any
           const validColumn = getValidColumn(column)
           const columnIndex = columns.indexOf(validColumn)
-          groupHead[validColumn.id] = original ? validColumn.field : column.getTitle()
+          groupHead[validColumn.id] = headerExportMethod ? headerExportMethod({ column, $table }) : (original ? validColumn.field : column.getTitle())
           if (_colSpan > 1 || _rowSpan > 1) {
             sheetMerges.push({
               s: { r: rIndex, c: columnIndex },
@@ -164,7 +164,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     beforeRowCount += colList.length
   }
   // 处理合并
-  if (isMerge && !original) {
+  if (isMerge) {
     mergeCells.forEach(mergeItem => {
       const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       sheetMerges.push({
@@ -187,7 +187,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     const footers = getFooterData(options, footerData)
     const mergeFooterItems = $table.getMergeFooterItems()
     // 处理合并
-    if (isMerge && !original) {
+    if (isMerge) {
       mergeFooterItems.forEach(mergeItem => {
         const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
         sheetMerges.push({
