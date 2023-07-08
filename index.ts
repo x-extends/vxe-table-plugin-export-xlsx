@@ -119,6 +119,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   const { headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign } = props
   const { rowHeight } = reactData
   const { message, sheetName, isHeader, isFooter, isMerge, isColgroup, original, useStyle, sheetMethod } = options
+  const _isCustomColumn: boolean = (options as any)._isCustomColumn
   const showMsg = message !== false
   const mergeCells = $table.getMergeCells()
   const colList: any[] = []
@@ -164,7 +165,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     beforeRowCount += colList.length
   }
   // 处理合并
-  if (isMerge) {
+  if (isMerge && !_isCustomColumn) {
     mergeCells.forEach(mergeItem => {
       const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       sheetMerges.push({
@@ -187,7 +188,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     const footers = getFooterData(options, footerData)
     const mergeFooterItems = $table.getMergeFooterItems()
     // 处理合并
-    if (isMerge) {
+    if (isMerge && !_isCustomColumn) {
       mergeFooterItems.forEach(mergeItem => {
         const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
         sheetMerges.push({
@@ -288,7 +289,8 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
         })
       })
     }
-    if (useStyle && sheetMethod) {
+    // 自定义处理
+    if (sheetMethod) {
       sheetMethod({ options: options, workbook, worksheet: sheet, columns, colgroups, datas, $table })
     }
     sheetMerges.forEach(({ s, e }) => {
