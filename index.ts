@@ -116,9 +116,11 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   const { modal, t } = vxetable
   const { $table, options, columns, colgroups, datas } = params
   const { props, reactData } = $table
+  const { computeColumnOpts } = $table.getComputeMaps()
   const { headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign } = props
   const { rowHeight } = reactData
   const { message, sheetName, isHeader, isFooter, isMerge, isColgroup, original, useStyle, sheetMethod } = options
+  const columnOpts = computeColumnOpts.value
   const _isCustomColumn: boolean = (options as any)._isCustomColumn
   const showMsg = message !== false
   const mergeCells = $table.getMergeCells()
@@ -127,10 +129,8 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   const sheetCols: any[] = []
   const sheetMerges: { s: { r: number, c: number }, e: { r: number, c: number } }[] = []
   let beforeRowCount = 0
-  const colHead: any = {}
   columns.forEach((column) => {
-    const { id, field, renderWidth, headerExportMethod } = column as any
-    colHead[id] = headerExportMethod ? headerExportMethod({ column, $table }) : (original ? field : column.getTitle())
+    const { id, renderWidth } = column
     sheetCols.push({
       key: id,
       width: XEUtils.ceil(renderWidth / 8, 1)
@@ -146,10 +146,11 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
           groupHead[column.id] = null
         })
         cols.forEach((column) => {
-          const { _colSpan, _rowSpan, headerExportMethod } = column as any
+          const { _colSpan, _rowSpan } = column
           const validColumn = getValidColumn(column)
           const columnIndex = columns.indexOf(validColumn)
-          groupHead[validColumn.id] = headerExportMethod ? headerExportMethod({ column, $table }) : (original ? validColumn.field : column.getTitle())
+          const headExportMethod = (column as any).headerExportMethod || (columnOpts as any).headerExportMethod
+          groupHead[validColumn.id] = headExportMethod ? headExportMethod({ column, options, $table }) : (original ? validColumn.field : column.getTitle())
           if (_colSpan > 1 || _rowSpan > 1) {
             sheetMerges.push({
               s: { r: rIndex, c: columnIndex },
@@ -160,6 +161,12 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
         colList.push(groupHead)
       })
     } else {
+      const colHead: any = {}
+      columns.forEach((column) => {
+        const { id, field } = column as any
+        const headExportMethod = (column as any).headerExportMethod || (columnOpts as any).headerExportMethod
+        colHead[id] = headExportMethod ? headExportMethod({ column, options, $table }) : (original ? field : column.getTitle())
+      })
       colList.push(colHead)
     }
     beforeRowCount += colList.length
