@@ -114,7 +114,7 @@ function getDefaultBorderStyle () {
 function exportXLSX (params: InterceptorExportParams) {
   const msgKey = 'xlsx'
   const { $table, options, columns, colgroups, datas } = params
-  const { $vxe, rowHeight, headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign } = $table
+  const { $vxe, rowHeight, headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign, columnOpts } = $table
   const { modal, t } = $vxe
   const { message, sheetName, isHeader, isFooter, isMerge, isColgroup, original, useStyle, sheetMethod } = options
   const _isCustomColumn: boolean = (options as any)._isCustomColumn
@@ -125,10 +125,8 @@ function exportXLSX (params: InterceptorExportParams) {
   const sheetCols: any[] = []
   const sheetMerges: { s: { r: number, c: number }, e: { r: number, c: number } }[] = []
   let beforeRowCount = 0
-  const colHead: any = {}
   columns.forEach((column) => {
-    const { id, field, renderWidth, headerExportMethod } = column
-    colHead[id] = headerExportMethod ? headerExportMethod({ column, $table }) : (original ? field : column.getTitle())
+    const { id, renderWidth } = column
     sheetCols.push({
       key: id,
       width: XEUtils.ceil(renderWidth / 8, 1)
@@ -144,10 +142,11 @@ function exportXLSX (params: InterceptorExportParams) {
           groupHead[column.id] = null
         })
         cols.forEach((column) => {
-          const { _colSpan, _rowSpan, headerExportMethod } = column
+          const { _colSpan, _rowSpan } = column
           const validColumn = getValidColumn(column)
           const columnIndex = columns.indexOf(validColumn)
-          groupHead[validColumn.id] = headerExportMethod ? headerExportMethod({ column, $table }) : (original ? validColumn.field : column.getTitle())
+          const headExportMethod = column.headerExportMethod || columnOpts.headerExportMethod
+          groupHead[validColumn.id] = headExportMethod ? headExportMethod({ column, options, $table }) : (original ? validColumn.field : column.getTitle())
           if (_colSpan > 1 || _rowSpan > 1) {
             sheetMerges.push({
               s: { r: rIndex, c: columnIndex },
@@ -158,6 +157,12 @@ function exportXLSX (params: InterceptorExportParams) {
         colList.push(groupHead)
       })
     } else {
+      const colHead: any = {}
+      columns.forEach((column) => {
+        const { id, field } = column
+        const headExportMethod = column.headerExportMethod || columnOpts.headerExportMethod
+        colHead[id] = headExportMethod ? headExportMethod({ column, options, $table }) : (original ? field : column.getTitle())
+      })
       colList.push(colHead)
     }
     beforeRowCount += colList.length
