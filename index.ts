@@ -451,7 +451,11 @@ function handleExportEvent (params: InterceptorExportParams) {
  */
 export const VXETablePluginExportXLSX = {
   install (vxetable: typeof VXETable) {
-    const { interceptor } = vxetable
+    // 检查版本
+    if (!/^(2|3)\./.test(vxetable.version)) {
+      console.error('[vxe-table-plugin-export-xlsx] Version vxe-table 3.x is required')
+    }
+
     vxetable.setup({
       export: {
         types: {
@@ -459,7 +463,7 @@ export const VXETablePluginExportXLSX = {
         }
       }
     })
-    interceptor.mixin({
+    vxetable.interceptor.mixin({
       'event.import': handleImportEvent,
       'event.export': handleExportEvent
     })
