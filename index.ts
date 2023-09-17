@@ -1,6 +1,6 @@
 import XEUtils from 'xe-utils'
 import {
-  VXETable,
+  VXETableCore,
   Table,
   InterceptorExportParams,
   InterceptorImportParams,
@@ -450,7 +450,7 @@ function handleExportEvent (params: InterceptorExportParams) {
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
-  install (vxetable: typeof VXETable) {
+  install (vxetable: VXETableCore) {
     // 检查版本
     if (!/^(2|3)\./.test(vxetable.version)) {
       console.error('[vxe-table-plugin-export-xlsx] Version vxe-table 3.x is required')
