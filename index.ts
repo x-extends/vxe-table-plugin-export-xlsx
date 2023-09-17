@@ -5,12 +5,12 @@ import ExcelJS from 'exceljs'
 let vxetable:VXETableCore
 
 declare module 'vxe-table' {
-  namespace VxeTableDefines {
-    interface ExtortSheetMethodParams {
+  export namespace VxeTableDefines {
+    export interface ExtortSheetMethodParams {
       workbook: ExcelJS.Workbook;
       worksheet: ExcelJS.Worksheet;
     }
-    interface ColumnInfo {
+    export interface ColumnInfo {
       _row: any;
       _colSpan: number;
       _rowSpan: number;
@@ -448,22 +448,23 @@ function handleExportEvent (params: VxeGlobalInterceptorHandles.InterceptorExpor
 }
 
 /**
- * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
+ * 基于 vxe-table 表格的扩展插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
-  install (vxetablecore: VXETableCore) {
-    const { setup, interceptor } = vxetablecore
+  install (vxetable: VXETableCore) {
+    // 检查版本
+    if (!/^(4)\./.test(vxetable.version)) {
+      console.error('[vxe-table-plugin-export-pdf] Version vxe-table 4.x is required')
+    }
 
-    vxetable = vxetablecore
-
-    setup({
+    vxetable.setup({
       export: {
         types: {
           xlsx: 0
         }
       }
     })
-    interceptor.mixin({
+    vxetable.interceptor.mixin({
       'event.import': handleImportEvent,
       'event.export': handleExportEvent
     })
