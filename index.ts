@@ -1,8 +1,8 @@
 import XEUtils from 'xe-utils'
-import { VXETableCore, VxeTableConstructor, VxeTablePropTypes, VxeTableDefines, VxeGlobalInterceptorHandles } from 'vxe-table'
+import type { VXETableCore, VxeTableConstructor, VxeTablePropTypes, VxeTableDefines, VxeGlobalInterceptorHandles } from 'vxe-table'
 import type ExcelJS from 'exceljs'
 
-let vxetable: VXETableCore
+let globalVxetable: VXETableCore
 let globalExcelJS: any
 
 declare module 'vxe-table' {
@@ -114,7 +114,7 @@ function getDefaultBorderStyle () {
 
 function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams) {
   const msgKey = 'xlsx'
-  const { modal, t } = vxetable
+  const { modal, t } = globalVxetable
   const { $table, options, columns, colgroups, datas } = params
   const { props, reactData } = $table
   const { computeColumnOpts } = $table.getComputeMaps()
@@ -323,7 +323,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
 }
 
 function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportParams, blob: Blob, options: VxeTablePropTypes.ExportConfig) {
-  const { modal, t } = vxetable
+  const { modal, t } = globalVxetable
   const { message, filename, type } = options
   const showMsg = message !== false
   if (window.Blob) {
@@ -350,7 +350,7 @@ function checkImportData (tableFields: string[], fields: string[]) {
 }
 
 function importError (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
-  const { modal, t } = vxetable
+  const { modal, t } = globalVxetable
   const { $table, options } = params
   const { internalData } = $table
   const { _importReject } = internalData
@@ -364,7 +364,7 @@ function importError (params: VxeGlobalInterceptorHandles.InterceptorImportParam
 }
 
 function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams) {
-  const { modal, t } = vxetable
+  const { modal, t } = globalVxetable
   const { $table, columns, options, file } = params
   const { internalData } = $table
   const { _importResolve } = internalData
@@ -460,6 +460,7 @@ export const VXETablePluginExportXLSX = {
       console.error('[vxe-table-plugin-export-pdf] Version vxe-table 4.x is required')
     }
 
+    globalVxetable = vxetable
     globalExcelJS = options ? options.ExcelJS : null
 
     vxetable.config({
