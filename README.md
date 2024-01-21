@@ -14,16 +14,23 @@
 ## Installing
 
 ```shell
-npm install xe-utils vxe-table@next vxe-table-plugin-export-xlsx@next exceljs
+npm install vxe-table@next vxe-table-plugin-export-xlsx@next exceljs
 ```
 
 ```javascript
 // ...
 import VXETable from 'vxe-table'
 import VXETablePluginExportXLSX from 'vxe-table-plugin-export-xlsx'
+import ExcelJS from 'exceljs'
 // ...
 
-VXETable.use(VXETablePluginExportXLSX)
+// 方式1：NPM 安装，注入 ExcelJS 对象
+VXETable.use(VXETablePluginExportXLSX, {
+  ExcelJS
+})
+
+// 方式2：CDN 安装，只要确保 window.ExcelJS 存在即可
+// VXETable.use(VXETablePluginExportXLSX)
 ```
 
 ## Demo

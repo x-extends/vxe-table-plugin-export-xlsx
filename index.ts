@@ -1,8 +1,9 @@
 import XEUtils from 'xe-utils'
 import { VXETableCore, VxeTableConstructor, VxeTablePropTypes, VxeTableDefines, VxeGlobalInterceptorHandles } from 'vxe-table'
-import ExcelJS from 'exceljs'
+import type ExcelJS from 'exceljs'
 
-let vxetable:VXETableCore
+let vxetable: VXETableCore
+let globalExcelJS: any
 
 declare module 'vxe-table' {
   export namespace VxeTableDefines {
@@ -213,7 +214,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     })
   }
   const exportMethod = () => {
-    const workbook = new ExcelJS.Workbook()
+    const workbook: ExcelJS.Workbook = new (globalExcelJS || (window as any).ExcelJS).Workbook()
     const sheet = workbook.addWorksheet(sheetName)
     workbook.creator = 'vxe-table'
     sheet.columns = sheetCols
@@ -380,7 +381,7 @@ function importXLSX (params: VxeGlobalInterceptorHandles.InterceptorImportParams
         tableFields.push(field)
       }
     })
-    const workbook = new ExcelJS.Workbook()
+    const workbook: ExcelJS.Workbook = new (globalExcelJS || (window as any).ExcelJS).Workbook()
     const readerTarget = evnt.target
     if (readerTarget) {
       workbook.xlsx.load(readerTarget.result as ArrayBuffer).then(wb => {
@@ -451,13 +452,17 @@ function handleExportEvent (params: VxeGlobalInterceptorHandles.InterceptorExpor
  * 基于 vxe-table 表格的扩展插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
-  install (vxetable: VXETableCore) {
+  install (vxetable: VXETableCore, options?: {
+    ExcelJS?: any
+  }) {
     // 检查版本
     if (!/^(4)\./.test(vxetable.version)) {
       console.error('[vxe-table-plugin-export-pdf] Version vxe-table 4.x is required')
     }
 
-    vxetable.setup({
+    globalExcelJS = options ? options.ExcelJS : null
+
+    vxetable.config({
       export: {
         types: {
           xlsx: 0
