@@ -8,7 +8,9 @@ import {
   TableExportConfig,
   ColumnAlign
 } from 'vxe-table'
-import * as ExcelJS from 'exceljs'
+import type ExcelJS from 'exceljs'
+
+let globalExcelJS: any
 
 const defaultHeaderBackgroundColor = 'f8f8f9'
 const defaultCellFontColor = '606266'
@@ -49,7 +51,7 @@ function getFooterCellValue ($table: Table, opts: TableExportConfig, rows: any[]
 }
 
 declare module 'vxe-table' {
-  interface ColumnInfo {
+  export interface ColumnInfo {
     _row: any;
     _colSpan: number;
     _rowSpan: number;
@@ -209,16 +211,16 @@ function exportXLSX (params: InterceptorExportParams) {
     })
   }
   const exportMethod = () => {
-    const workbook = new ExcelJS.Workbook()
+    const workbook: ExcelJS.Workbook = new (globalExcelJS || (window as any).ExcelJS).Workbook()
     const sheet = workbook.addWorksheet(sheetName)
     workbook.creator = 'vxe-table'
     sheet.columns = sheetCols
     if (isHeader) {
-      sheet.addRows(colList).forEach(excelRow => {
+      sheet.addRows(colList).forEach((excelRow: any) => {
         if (useStyle) {
           setExcelRowHeight(excelRow, rowHeight)
         }
-        excelRow.eachCell(excelCell => {
+        excelRow.eachCell((excelCell: any) => {
           const excelCol = sheet.getColumn(excelCell.col)
           const column: any = $table.getColumnById(excelCol.key as string)
           const { headerAlign, align } = column
@@ -244,11 +246,11 @@ function exportXLSX (params: InterceptorExportParams) {
         })
       })
     }
-    sheet.addRows(rowList).forEach(excelRow => {
+    sheet.addRows(rowList).forEach((excelRow) => {
       if (useStyle) {
         setExcelRowHeight(excelRow, rowHeight)
       }
-      excelRow.eachCell(excelCell => {
+      excelRow.eachCell((excelCell) => {
         const excelCol = sheet.getColumn(excelCell.col)
         const column: any = $table.getColumnById(excelCol.key as string)
         const { align } = column
@@ -296,7 +298,7 @@ function exportXLSX (params: InterceptorExportParams) {
     sheetMerges.forEach(({ s, e }) => {
       sheet.mergeCells(s.r + 1, s.c + 1, e.r + 1, e.c + 1)
     })
-    workbook.xlsx.writeBuffer().then(buffer => {
+    workbook.xlsx.writeBuffer().then((buffer: any) => {
       const blob = new Blob([buffer], { type: 'application/octet-stream' })
       // 导出 xlsx
       downloadFile(params, blob, options)
@@ -344,7 +346,7 @@ function checkImportData (tableFields: string[], fields: string[]) {
 }
 
 declare module 'vxe-table' {
-  interface Table {
+  export interface Table {
     _importResolve?: Function | null;
     _importReject?: Function | null;
   }
@@ -379,7 +381,7 @@ function importXLSX (params: InterceptorImportParams) {
         tableFields.push(field)
       }
     })
-    const workbook = new ExcelJS.Workbook()
+    const workbook: ExcelJS.Workbook = new (globalExcelJS || (window as any).ExcelJS).Workbook()
     const readerTarget = evnt.target
     if (readerTarget) {
       workbook.xlsx.load(readerTarget.result as ArrayBuffer).then(wb => {
@@ -450,13 +452,17 @@ function handleExportEvent (params: InterceptorExportParams) {
  * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
  */
 export const VXETablePluginExportXLSX = {
-  install (vxetable: VXETableCore) {
+  install (vxetable: VXETableCore, options?: {
+    ExcelJS?: any
+  }) {
     // 检查版本
-    if (!/^(2|3)\./.test(vxetable.version)) {
-      console.error('[vxe-table-plugin-export-xlsx] Version vxe-table 3.x is required')
+    if (!/^(3)\./.test(vxetable.version)) {
+      console.error('[vxe-table-plugin-export-xlsx 3.x] Version vxe-table 3.x is required')
     }
 
-    vxetable.setup({
+    globalExcelJS = options ? options.ExcelJS : null
+
+    vxetable.config({
       export: {
         types: {
           xlsx: 0
