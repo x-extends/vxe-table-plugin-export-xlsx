@@ -457,7 +457,7 @@ export const VXETablePluginExportXLSX = {
   }) {
     // 检查版本
     if (!/^(4)\./.test(vxetable.version)) {
-      console.error('[vxe-table-plugin-export-pdf] Version vxe-table 4.x is required')
+      console.error('[vxe-table-plugin-export-pdf 4.x] Version vxe-table 4.x is required')
     }
 
     globalVxetable = vxetable
