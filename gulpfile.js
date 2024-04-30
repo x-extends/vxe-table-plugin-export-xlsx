@@ -18,7 +18,7 @@ const exportModuleName = 'VXETablePluginExportXLSX'
 
 gulp.task('build_commonjs', function () {
   return gulp.src(['index.ts'])
-    .pipe(sourcemaps.init())
+    // .pipe(sourcemaps.init())
     .pipe(ts(tsconfig.compilerOptions))
     .pipe(babel({
       presets: ['@babel/env']
@@ -27,7 +27,7 @@ gulp.task('build_commonjs', function () {
       basename: 'index',
       extname: '.common.js'
     }))
-    .pipe(sourcemaps.write())
+    // .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'))
 })
 
