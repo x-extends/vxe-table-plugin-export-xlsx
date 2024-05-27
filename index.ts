@@ -464,11 +464,24 @@ export const VXETablePluginExportXLSX = {
     globalExcelJS = options ? options.ExcelJS : null
 
     vxetable.config({
+      table: {
+        importConfig: {
+          _typeMaps: {
+            xlsx: 1
+          }
+        } as any,
+        exportConfig: {
+          _typeMaps: {
+            xlsx: 1
+          }
+        } as any
+      },
+      // 兼容老
       export: {
         types: {
           xlsx: 0
         }
-      }
+      } as any
     })
     vxetable.interceptor.mixin({
       'event.import': handleImportEvent,
