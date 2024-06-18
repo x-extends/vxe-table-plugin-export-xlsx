@@ -76,6 +76,12 @@ export default {
 }
 ```
 
+## Contributors
+
+Thank you to everyone who contributed to this project.
+
+[![vxe-table-plugin-export-xlsx](https://contrib.rocks/image?repo=x-extends/vxe-table-plugin-export-xlsx)](https://github.com/x-extends/vxe-table-plugin-export-xlsx/graphs/contributors)
+
 ## License
 
 [MIT](LICENSE) © 2019-present, Xu Liangzhan
