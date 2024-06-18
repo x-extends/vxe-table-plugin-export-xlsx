@@ -14,7 +14,7 @@
 ## Installing
 
 ```shell
-npm install vxe-table@next vxe-table-plugin-export-xlsx@next exceljs
+npm install vxe-table vxe-table-plugin-export-xlsx exceljs
 ```
 
 ```javascript
