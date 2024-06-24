@@ -463,6 +463,18 @@ export const VXETablePluginExportXLSX = {
     globalExcelJS = options ? options.ExcelJS : null
 
     vxetable.config({
+      table: {
+        importConfig: {
+          _typeMaps: {
+            xlsx: 1
+          }
+        },
+        exportConfig: {
+          _typeMaps: {
+            xlsx: 1
+          }
+        }
+      },
       export: {
         types: {
           xlsx: 0
