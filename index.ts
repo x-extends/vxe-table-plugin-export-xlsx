@@ -122,7 +122,6 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   const { rowHeight } = reactData
   const { message, sheetName, isHeader, isFooter, isMerge, isColgroup, original, useStyle, sheetMethod } = options
   const columnOpts = computeColumnOpts.value
-  const _isCustomColumn: boolean = (options as any)._isCustomColumn
   const showMsg = message !== false
   const mergeCells = $table.getMergeCells()
   const colList: any[] = []
@@ -173,7 +172,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     beforeRowCount += colList.length
   }
   // 处理合并
-  if (isMerge && !_isCustomColumn) {
+  if (isMerge) {
     mergeCells.forEach(mergeItem => {
       const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       sheetMerges.push({
@@ -196,7 +195,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
     const footers = getFooterData(options, footerData)
     const mergeFooterItems = $table.getMergeFooterItems()
     // 处理合并
-    if (isMerge && !_isCustomColumn) {
+    if (isMerge) {
       mergeFooterItems.forEach(mergeItem => {
         const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
         sheetMerges.push({
