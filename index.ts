@@ -1,13 +1,5 @@
 import XEUtils from 'xe-utils'
-import {
-  VXETableCore,
-  Table,
-  InterceptorExportParams,
-  InterceptorImportParams,
-  ColumnConfig,
-  TableExportConfig,
-  ColumnAlign
-} from 'vxe-table'
+import { VXETableCore } from 'vxe-table'
 import type ExcelJS from 'exceljs'
 
 let globalExcelJS: any
@@ -17,7 +9,7 @@ const defaultCellFontColor = '606266'
 const defaultCellBorderStyle = 'thin'
 const defaultCellBorderColor = 'e8eaec'
 
-function getCellLabel (column: ColumnConfig, cellValue: any) {
+function getCellLabel (column: any, cellValue: any) {
   if (cellValue) {
     if (column.type === 'seq') {
       return XEUtils.toValueString(cellValue)
@@ -40,12 +32,12 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
   return cellValue
 }
 
-function getFooterData (opts: TableExportConfig, footerData: any[][]) {
+function getFooterData (opts: any, footerData: any[][]) {
   const { footerFilterMethod } = opts
   return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
 
-function getFooterCellValue ($table: Table, opts: TableExportConfig, rows: any[], column: ColumnConfig) {
+function getFooterCellValue ($table: any, opts: any, rows: any[], column: any) {
   const cellValue = getCellLabel(column, rows[$table.getVMColumnIndex(column)])
   return cellValue
 }
@@ -55,11 +47,11 @@ declare module 'vxe-table' {
     _row: any;
     _colSpan: number;
     _rowSpan: number;
-    childNodes: ColumnConfig[];
+    childNodes: any[];
   }
 }
 
-function getValidColumn (column: ColumnConfig): ColumnConfig {
+function getValidColumn (column: any): any {
   const { childNodes } = column
   const isColGroup = childNodes && childNodes.length
   if (isColGroup) {
@@ -74,7 +66,7 @@ function setExcelRowHeight (excelRow: ExcelJS.Row, height: number) {
   }
 }
 
-function setExcelCellStyle (excelCell: ExcelJS.Cell, align?: ColumnAlign) {
+function setExcelCellStyle (excelCell: ExcelJS.Cell, align?: any) {
   excelCell.protection = {
     locked: false
   }
@@ -113,7 +105,7 @@ function getDefaultBorderStyle () {
   }
 }
 
-function exportXLSX (params: InterceptorExportParams) {
+function exportXLSX (params: any) {
   const msgKey = 'xlsx'
   const { $table, options, columns, colgroups, datas } = params
   const { $vxe, rowHeight, headerAlign: allHeaderAlign, align: allAlign, footerAlign: allFooterAlign, columnOpts } = $table
@@ -126,7 +118,7 @@ function exportXLSX (params: InterceptorExportParams) {
   const sheetCols: any[] = []
   const sheetMerges: { s: { r: number, c: number }, e: { r: number, c: number } }[] = []
   let beforeRowCount = 0
-  columns.forEach((column) => {
+  columns.forEach((column: any) => {
     const { id, renderWidth } = column
     sheetCols.push({
       key: id,
@@ -137,12 +129,12 @@ function exportXLSX (params: InterceptorExportParams) {
   if (isHeader) {
     // 处理分组
     if (isColgroup && colgroups) {
-      colgroups.forEach((cols, rIndex) => {
+      colgroups.forEach((cols: any, rIndex: any) => {
         const groupHead: any = {}
-        columns.forEach((column) => {
+        columns.forEach((column: any) => {
           groupHead[column.id] = null
         })
-        cols.forEach((column) => {
+        cols.forEach((column: any) => {
           const { _colSpan, _rowSpan } = column
           const validColumn = getValidColumn(column)
           const columnIndex = columns.indexOf(validColumn)
@@ -159,7 +151,7 @@ function exportXLSX (params: InterceptorExportParams) {
       })
     } else {
       const colHead: any = {}
-      columns.forEach((column) => {
+      columns.forEach((column: any) => {
         const { id, field } = column
         const headExportMethod = column.headerExportMethod || columnOpts.headerExportMethod
         colHead[id] = headExportMethod ? headExportMethod({ column, options, $table }) : (original ? field : column.getTitle())
@@ -170,7 +162,7 @@ function exportXLSX (params: InterceptorExportParams) {
   }
   // 处理合并
   if (isMerge) {
-    mergeCells.forEach(mergeItem => {
+    mergeCells.forEach((mergeItem: any) => {
       const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
       sheetMerges.push({
         s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
@@ -178,9 +170,9 @@ function exportXLSX (params: InterceptorExportParams) {
       })
     })
   }
-  const rowList = datas.map(item => {
+  const rowList = datas.map((item: any) => {
     const rest: any = {}
-    columns.forEach((column) => {
+    columns.forEach((column: any) => {
       rest[column.id] = getCellLabel(column, item[column.id])
     })
     return rest
@@ -193,7 +185,7 @@ function exportXLSX (params: InterceptorExportParams) {
     const mergeFooterItems = $table.getMergeFooterItems()
     // 处理合并
     if (isMerge) {
-      mergeFooterItems.forEach(mergeItem => {
+      mergeFooterItems.forEach((mergeItem: any) => {
         const { row: mergeRowIndex, rowspan: mergeRowspan, col: mergeColIndex, colspan: mergeColspan } = mergeItem
         sheetMerges.push({
           s: { r: mergeRowIndex + beforeRowCount, c: mergeColIndex },
@@ -203,7 +195,7 @@ function exportXLSX (params: InterceptorExportParams) {
     }
     footers.forEach((rows) => {
       const item: any = {}
-      columns.forEach((column) => {
+      columns.forEach((column: any) => {
         item[column.id] = getFooterCellValue($table, options, rows, column)
       })
       footList.push(item)
@@ -315,7 +307,7 @@ function exportXLSX (params: InterceptorExportParams) {
   }
 }
 
-function downloadFile (params: InterceptorExportParams, blob: Blob, options: TableExportConfig) {
+function downloadFile (params: any, blob: Blob, options: any) {
   const { $table } = params
   const { $vxe } = $table
   const { modal, t } = $vxe
@@ -350,7 +342,7 @@ declare module 'vxe-table' {
     _importReject?: Function | null;
   }
 }
-function importError (params: InterceptorImportParams) {
+function importError (params: any) {
   const { $table, options } = params
   const { $vxe, _importReject } = $table
   const showMsg = options.message !== false
@@ -363,7 +355,7 @@ function importError (params: InterceptorImportParams) {
   }
 }
 
-function importXLSX (params: InterceptorImportParams) {
+function importXLSX (params: any) {
   const { $table, columns, options, file } = params
   const { $vxe, _importResolve } = $table
   const { modal, t } = $vxe
@@ -374,7 +366,7 @@ function importXLSX (params: InterceptorImportParams) {
   }
   fileReader.onload = (evnt) => {
     const tableFields: string[] = []
-    columns.forEach((column) => {
+    columns.forEach((column: any) => {
       const field = column.field
       if (field) {
         tableFields.push(field)
@@ -433,14 +425,14 @@ function importXLSX (params: InterceptorImportParams) {
   fileReader.readAsArrayBuffer(file)
 }
 
-function handleImportEvent (params: InterceptorImportParams) {
+function handleImportEvent (params: any) {
   if (params.options.type === 'xlsx') {
     importXLSX(params)
     return false
   }
 }
 
-function handleExportEvent (params: InterceptorExportParams) {
+function handleExportEvent (params: any) {
   if (params.options.type === 'xlsx') {
     exportXLSX(params)
     return false
