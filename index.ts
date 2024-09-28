@@ -53,9 +53,13 @@ function getFooterData (opts: VxeTablePropTypes.ExportConfig, footerData: any[][
   return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
 
-function getFooterCellValue ($table: VxeTableConstructor, opts: VxeTablePropTypes.ExportConfig, rows: any[], column: VxeTableDefines.ColumnInfo) {
-  const cellValue = getCellLabel(column, rows[$table.getVMColumnIndex(column)])
-  return cellValue
+function getFooterCellValue ($xeTable: VxeTableConstructor, opts: VxeTablePropTypes.ExportConfig, row: any, column: VxeTableDefines.ColumnInfo) {
+  const _columnIndex = $xeTable.getVTColumnIndex(column)
+  // 兼容老模式
+  if (XEUtils.isArray(row)) {
+    return getCellLabel(column, row[_columnIndex])
+  }
+  return getCellLabel(column, XEUtils.get(row, column.field))
 }
 
 function getValidColumn (column: VxeTableDefines.ColumnInfo): VxeTableDefines.ColumnInfo {
