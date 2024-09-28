@@ -37,9 +37,13 @@ function getFooterData (opts: any, footerData: any[][]) {
   return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
 
-function getFooterCellValue ($table: any, opts: any, rows: any[], column: any) {
-  const cellValue = getCellLabel(column, rows[$table.getVMColumnIndex(column)])
-  return cellValue
+function getFooterCellValue ($xeTable: any, opts: any, row: any, column: any) {
+  const _columnIndex = $xeTable.getVTColumnIndex(column)
+  // 兼容老模式
+  if (XEUtils.isArray(row)) {
+    return getCellLabel(column, row[_columnIndex])
+  }
+  return getCellLabel(column, XEUtils.get(row, column.field))
 }
 
 declare module 'vxe-table' {
