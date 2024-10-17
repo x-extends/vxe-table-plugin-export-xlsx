@@ -382,12 +382,12 @@ function importXLSX (params: any) {
       workbook.xlsx.load(readerTarget.result as ArrayBuffer).then(wb => {
         const firstSheet = wb.worksheets[0]
         if (firstSheet) {
-          const sheetValues = firstSheet.getSheetValues() as string[][]
+          const sheetValues = Array.from(firstSheet.getSheetValues()) as string[][]
           const fieldIndex = XEUtils.findIndexOf(sheetValues, (list) => list && list.length > 0)
           const fields = sheetValues[fieldIndex] as string[]
           const status = checkImportData(tableFields, fields)
           if (status) {
-            const records = sheetValues.slice(fieldIndex).map(list => {
+            const records = sheetValues.slice(fieldIndex + 1).map(list => {
               const item : any = {}
               list.forEach((cellValue, cIndex) => {
                 item[fields[cIndex]] = cellValue
