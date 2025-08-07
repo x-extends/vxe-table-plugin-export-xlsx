@@ -200,7 +200,12 @@ function exportXLSX (params: any) {
     footers.forEach((rows) => {
       const item: any = {}
       columns.forEach((column: any) => {
-        item[column.id] = getFooterCellValue($table, options, rows, column)
+        const { footerExportMethod } = column
+        if (typeof footerExportMethod === 'function') {
+          item[column.id] = footerExportMethod({ items: rows, _columnIndex: $table.getVMColumnIndex(column), options })
+        } else {
+          item[column.id] = getFooterCellValue($table, options, rows, column)
+        }
       })
       footList.push(item)
     })
