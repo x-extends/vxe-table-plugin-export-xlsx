@@ -1,3 +1,5 @@
+/// <reference path='./vxe-table.d.ts' />
+
 import { VXETableCore } from 'vxe-table'
 
 /**
