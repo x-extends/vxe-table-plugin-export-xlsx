@@ -53,7 +53,7 @@ function getFooterData (opts: VxeTablePropTypes.ExportConfig, footerData: any[][
   return footerFilterMethod ? footerData.filter((items, index) => footerFilterMethod({ items, $rowIndex: index })) : footerData
 }
 
-function getFooterCellValue ($xeTable: VxeTableConstructor, opts: VxeTablePropTypes.ExportConfig, row: any, column: VxeTableDefines.ColumnInfo) {
+function getFooterCellValue ($xeTable: VxeTableConstructor, _opts: VxeTablePropTypes.ExportConfig, row: any, column: VxeTableDefines.ColumnInfo) {
   const _columnIndex = $xeTable.getVTColumnIndex(column)
   // 兼容老模式
   if (XEUtils.isArray(row)) {
@@ -325,7 +325,7 @@ function exportXLSX (params: VxeGlobalInterceptorHandles.InterceptorExportParams
   }
 }
 
-function downloadFile (params: VxeGlobalInterceptorHandles.InterceptorExportParams, blob: Blob, options: VxeTablePropTypes.ExportConfig) {
+function downloadFile (_params: VxeGlobalInterceptorHandles.InterceptorExportParams, blob: Blob, options: VxeTablePropTypes.ExportConfig) {
   const { modal, t } = globalVxetable
   const { message, filename, type } = options
   const showMsg = message !== false
